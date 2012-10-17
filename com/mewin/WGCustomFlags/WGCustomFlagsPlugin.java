@@ -17,7 +17,6 @@ import java.util.Iterator;
 import java.util.logging.Level;
 import org.bukkit.World;
 import org.bukkit.plugin.Plugin;
-import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.java.JavaPlugin;
 
 /**
