@@ -79,8 +79,7 @@ public class WGCustomFlagsPlugin extends JavaPlugin {
     @Override
     public void onDisable()
     {
-        //saveAllWorlds();
-        //flags get unloaded and saved anyway
+        saveAllWorlds();
     }
     
     /**
