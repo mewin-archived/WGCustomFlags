@@ -138,6 +138,7 @@ public class JDBCSaveHandler implements FlagSaveHandler {
                             else
                             {
                                 plugin.getLogger().severe("An unknown error occured.");
+                                plugin.getLogger().log(Level.SEVERE, "SQL query: {0}", nextSql);
                             }
                         }
                         else
