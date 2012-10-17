@@ -61,7 +61,6 @@ public class JDBCSaveHandler implements FlagSaveHandler {
     public void saveFlagsForWorld(World world)
     {
         RegionManager regionManager = WGCustomFlagsPlugin.wgPlugin.getRegionManager(world);
-        plugin.getLogger().log(Level.INFO, "Saving flags for world {0}", world.getName());
         if (regionManager == null) 
         {
             plugin.getLogger().info("Regions not activated, no flags saved.");
