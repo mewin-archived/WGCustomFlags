@@ -8,9 +8,15 @@ import com.mewin.WGCustomFlags.data.FlagSaveHandler;
 import com.mewin.WGCustomFlags.data.JDBCSaveHandler;
 import com.mewin.WGCustomFlags.data.YAMLSaveHandler;
 import com.mewin.WGCustomFlags.util.ClassHacker;
+import com.sk89q.util.yaml.YAMLFormat;
+import com.sk89q.util.yaml.YAMLProcessor;
 import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
 import com.sk89q.worldguard.protection.flags.DefaultFlag;
 import com.sk89q.worldguard.protection.flags.Flag;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -25,11 +31,23 @@ import org.bukkit.plugin.java.JavaPlugin;
  */
 public class WGCustomFlagsPlugin extends JavaPlugin {
     
+    private static final String DEFAULT_CONFIG = "# WGCustomFlags default config\r\n"
+                                               + "# If you edit this make sure not to use tabulators, but spaces.\r\n"
+                                               + "\r\n"
+                                               + "# name: save-handler\r\n"
+                                               + "# default: auto\r\n"
+                                               + "# description: determines wheter a database or a flat file is used to save the flags\r\n"
+                                               + "# values: auto - detect which option WorldGuard uses, flat - force flat file usage\r\n"
+                                               + "save-handler: auto";
+    
     private JDBCSaveHandler jdbcConnector;
     private WGCustomFlagsListener listener;
     
     public static HashMap<String, Flag> customFlags;
     public static WorldGuardPlugin wgPlugin;
+    
+    private File configFile;
+    private YAMLProcessor config;
     
     /**
      * Constructor for WGCustomFlagsPlugin
@@ -60,9 +78,65 @@ public class WGCustomFlagsPlugin extends JavaPlugin {
         }
     }
     
+    private void loadConfig()
+    {
+        getLogger().info("Loading configuration...");
+        if (!configFile.exists())
+        {
+            try
+            {
+                getLogger().info("No configuration found, writing defaults.");
+                writeDefaultConfig();
+            }
+            catch(IOException ex)
+            {
+                getLogger().log(Level.SEVERE, "Could not create default configuration.", ex);
+                
+                return;
+            }
+        }
+        
+        config = new YAMLProcessor(configFile, true, YAMLFormat.EXTENDED);
+        
+        try
+        {
+            config.load();
+        }
+        catch(IOException ex)
+        {
+            getLogger().log(Level.SEVERE, "Could read configuration.", ex);
+            return;
+        }
+        
+        getLogger().info("Configuration loaded.");
+        
+    }
+    
+    private void writeDefaultConfig() throws IOException
+    {
+        if (!this.getDataFolder().exists())
+        {
+            this.getDataFolder().mkdirs();
+        }
+        
+        if (!this.configFile.exists())
+        {
+            this.configFile.createNewFile();
+        }
+        
+        BufferedWriter out = new BufferedWriter(new FileWriter(configFile));
+        
+        out.write(DEFAULT_CONFIG);
+        
+        out.close();
+    }
+    
     @Override
     public void onEnable()
     {
+        configFile = new File(getDataFolder(), "config.yml");
+        
+        
         setupWgPlugin();
         if (wgPlugin.getGlobalStateManager().useSqlDatabase)
         {
@@ -72,6 +146,8 @@ public class WGCustomFlagsPlugin extends JavaPlugin {
         }
         
         getServer().getPluginManager().registerEvents(listener, this);
+        
+        loadConfig();
         
         ClassHacker.setPrivateValue(wgPlugin.getDescription(), "version", wgPlugin.getDescription().getVersion() + " with custom flags plugin.");
     }
@@ -104,15 +180,8 @@ public class WGCustomFlagsPlugin extends JavaPlugin {
     public void loadFlagsForWorld(World world)
     {
         //getLogger().log(Level.INFO, "Loading flags for world {0}", world.getName());
-        FlagSaveHandler handler;
-        if (wgPlugin.getGlobalStateManager().useSqlDatabase)
-        {
-            handler = jdbcConnector;
-        }
-        else
-        {
-            handler = new YAMLSaveHandler(this, wgPlugin);
-        }
+        FlagSaveHandler handler = getSaveHandler();
+        
         handler.loadFlagsForWorld(world);
     }
     
@@ -138,15 +207,7 @@ public class WGCustomFlagsPlugin extends JavaPlugin {
     public void saveFlagsForWorld(World world)
     {
         getLogger().log(Level.INFO, "Saving flags for world {0}", world.getName());
-        FlagSaveHandler handler;
-        if (wgPlugin.getGlobalStateManager().useSqlDatabase)
-        {
-            handler = jdbcConnector;
-        }
-        else
-        {
-            handler = new YAMLSaveHandler(this, wgPlugin);
-        }
+        FlagSaveHandler handler = getSaveHandler();
         
         handler.saveFlagsForWorld(world);
     }
@@ -205,6 +266,18 @@ public class WGCustomFlagsPlugin extends JavaPlugin {
             {
                 throw new RuntimeException("Flag["+i+"] is null");
             }
+        }
+    }
+    
+    private FlagSaveHandler getSaveHandler()
+    {
+        if (config.getString("save-handler", "auto").equals("auto") && wgPlugin.getGlobalStateManager().useSqlDatabase)
+        {
+            return jdbcConnector;
+        }
+        else
+        {
+            return new YAMLSaveHandler(this, wgPlugin);
         }
     }
     
