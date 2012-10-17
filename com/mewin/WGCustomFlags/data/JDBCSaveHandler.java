@@ -61,8 +61,10 @@ public class JDBCSaveHandler implements FlagSaveHandler {
     public void saveFlagsForWorld(World world)
     {
         RegionManager regionManager = WGCustomFlagsPlugin.wgPlugin.getRegionManager(world);
+        plugin.getLogger().log(Level.INFO, "Saving flags for world {0}", world.getName());
         if (regionManager == null) 
         {
+            plugin.getLogger().info("Regions not activated, no flags saved.");
             return;
         }
         Iterator<Entry<String, ProtectedRegion>> itr = regionManager.getRegions().entrySet().iterator();
@@ -75,8 +77,11 @@ public class JDBCSaveHandler implements FlagSaveHandler {
                         
             st.executeQuery("TRUNCATE TABLE worldflags");
         } catch (SQLException ex) {
-            plugin.getLogger().log(Level.SEVERE, null, ex);
+            plugin.getLogger().log(Level.SEVERE, "Error truncating worldflags", ex);
         }
+        
+        int flagCounter = 0;
+        int regionCounter = 0;
         
         while(itr.hasNext())
         {
@@ -84,11 +89,15 @@ public class JDBCSaveHandler implements FlagSaveHandler {
             ProtectedRegion region = entry.getValue();
             Iterator<Entry<Flag<?>, Object>> itr2 = region.getFlags().entrySet().iterator();
             
+            regionCounter++;
+            
             while(itr2.hasNext())
             {
                 Entry<Flag<?>, Object> entry2 = itr2.next();
                 Flag<?> flag = entry2.getKey();
                 Object value = entry2.getValue();
+                
+                flagCounter++;
                 
                 if (WGCustomFlagsPlugin.customFlags.containsKey(flag.getName()))
                 {
@@ -96,6 +105,7 @@ public class JDBCSaveHandler implements FlagSaveHandler {
                         String nextSql = "INSERT INTO worldflags(world, region, flagName, flagValue)" +
                                       "VALUES('" + world.getName() + "', '" + region.getId() + "', '" + flag.getName() + "', '";
                         String next = getFlagValue(flag, value);
+                        
                         if(next == null)
                         {
                             continue;
@@ -110,11 +120,13 @@ public class JDBCSaveHandler implements FlagSaveHandler {
                         Statement st2 = connection.createStatement();
                         st2.execute(nextSql);
                     } catch (SQLException ex) {
-                        Logger.getLogger(JDBCSaveHandler.class.getName()).log(Level.SEVERE, null, ex);
+                        plugin.getLogger().log(Level.SEVERE, "Could not save flags for world" + world.getName(), ex);
                     }
                 }
             }
         }
+        
+        plugin.getLogger().log(Level.INFO, "{0} flags saved for {1}", new Object[]{flagCounter, regionCounter});
     }
     
     private String getFlagValue(Flag flag, Object value)
