@@ -122,24 +122,18 @@ public class JDBCSaveHandler implements FlagSaveHandler {
                         connection.clearWarnings();
                         
                         Statement st2 = connection.createStatement();
-                        if (!st2.execute(nextSql))
+                        st2.execute(nextSql);
+                        
+                        SQLWarning warning = connection.getWarnings();
+                        
+                        if (warning == null)
                         {
-                            SQLWarning warning = connection.getWarnings();
-                            
-                            if (warning == null)
-                            {
-                                warning = st2.getWarnings();
-                            }
-                            
-                            if (warning != null)
-                            {
-                                throw warning;
-                            }
-                            else
-                            {
-                                plugin.getLogger().severe("An unknown error occured.");
-                                plugin.getLogger().log(Level.SEVERE, "SQL query: {0}", nextSql);
-                            }
+                            warning = st2.getWarnings();
+                        }
+                        
+                        if (warning != null)
+                        {
+                            throw warning;
                         }
                         else
                         {
