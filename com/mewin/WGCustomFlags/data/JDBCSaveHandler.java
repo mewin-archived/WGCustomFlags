@@ -79,8 +79,10 @@ public class JDBCSaveHandler implements FlagSaveHandler {
         Statement st;
         try {
             st = connection.createStatement();
-                        
-            st.executeQuery("TRUNCATE TABLE worldflags");
+            
+            plugin.getLogger().info("[DEBUG] Truncating table worldflags.");
+            
+            st.executeQuery("DELETE FROM worldflags WHERE world = '" + world.getName() + "'");
         } catch (SQLException ex) {
             plugin.getLogger().log(Level.SEVERE, "Error truncating worldflags", ex);
         }
@@ -122,6 +124,7 @@ public class JDBCSaveHandler implements FlagSaveHandler {
                         connection.clearWarnings();
                         
                         Statement st2 = connection.createStatement();
+                        plugin.getLogger().log(Level.INFO, "[DEBUG] Executing {0}", nextSql);
                         st2.execute(nextSql);
                         
                         SQLWarning warning = connection.getWarnings();
