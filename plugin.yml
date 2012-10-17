@@ -1,0 +1,7 @@
+name: WGCustomFlags
+main: com.mewin.WGCustomFlags.WGCustomFlagsPlugin
+version: 1.2.3
+depend: [WorldGuard]
+description: Allows other plugins to hook into WorldGuard and set own flags
+author: mewin
+website: http://dev.bukkit.org/server-mods/worldguard-custom-flags/
