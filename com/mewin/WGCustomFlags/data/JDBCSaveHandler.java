@@ -53,7 +53,7 @@ public class JDBCSaveHandler implements FlagSaveHandler {
         try {
             connection = DriverManager.getConnection(dns, username, password);
         } catch (SQLException ex) {
-            Logger.getLogger(JDBCSaveHandler.class.getName()).log(Level.SEVERE, null, ex);
+            plugin.getLogger().log(Level.SEVERE, "Could not connect to database.", ex);
         }
     }
     
