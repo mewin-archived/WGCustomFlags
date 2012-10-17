@@ -28,6 +28,7 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.SQLWarning;
 import java.sql.Statement;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -52,6 +53,11 @@ public class JDBCSaveHandler implements FlagSaveHandler {
         this.plugin = plugin;
         try {
             connection = DriverManager.getConnection(dns, username, password);
+            
+            if (connection.isReadOnly())
+            {
+                plugin.getLogger().severe("Database connection is read-only!");
+            }
         } catch (SQLException ex) {
             plugin.getLogger().log(Level.SEVERE, "Could not connect to database.", ex);
         }
@@ -96,8 +102,6 @@ public class JDBCSaveHandler implements FlagSaveHandler {
                 Flag<?> flag = entry2.getKey();
                 Object value = entry2.getValue();
                 
-                flagCounter++;
-                
                 if (WGCustomFlagsPlugin.customFlags.containsKey(flag.getName()))
                 {
                     try {
@@ -107,17 +111,39 @@ public class JDBCSaveHandler implements FlagSaveHandler {
                         
                         if(next == null)
                         {
+                            plugin.getLogger().log(Level.WARNING, "Value for flag {0} off region {1} is null.", new Object[]{flag.getName(), region.getId()});
                             continue;
                         }
                         
                         nextSql += next;
-                                
-                        
                         
                         nextSql += "')";
-                            
+                        
+                        connection.clearWarnings();
+                        
                         Statement st2 = connection.createStatement();
-                        st2.execute(nextSql);
+                        if (!st2.execute(nextSql))
+                        {
+                            SQLWarning warning = connection.getWarnings();
+                            
+                            if (warning == null)
+                            {
+                                warning = st2.getWarnings();
+                            }
+                            
+                            if (warning != null)
+                            {
+                                throw warning;
+                            }
+                            else
+                            {
+                                plugin.getLogger().severe("An unknown error occured.");
+                            }
+                        }
+                        else
+                        {
+                            flagCounter++;
+                        }
                     } catch (SQLException ex) {
                         plugin.getLogger().log(Level.SEVERE, "Could not save flags for world" + world.getName(), ex);
                     }
