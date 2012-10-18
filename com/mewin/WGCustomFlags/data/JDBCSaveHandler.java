@@ -82,7 +82,7 @@ public class JDBCSaveHandler implements FlagSaveHandler {
             
             plugin.getLogger().info("[DEBUG] Truncating table worldflags.");
             
-            st.executeQuery("DELETE FROM worldflags WHERE world = '" + world.getName() + "'");
+            st.execute("DELETE FROM worldflags WHERE world = '" + world.getName() + "'");
         } catch (SQLException ex) {
             plugin.getLogger().log(Level.SEVERE, "Error truncating worldflags", ex);
         }
