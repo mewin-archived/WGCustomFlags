@@ -101,7 +101,7 @@ public class YAMLSaveHandler implements FlagSaveHandler {
 
                     if(value == null)
                     {
-                        System.out.println("Value is null");
+                        //System.out.println("Value is null");
                         continue;
                     }
 
