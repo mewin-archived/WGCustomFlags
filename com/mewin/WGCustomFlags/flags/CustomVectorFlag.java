@@ -107,11 +107,6 @@ public class CustomVectorFlag extends CustomFlag<Vector> {
         return ret;
     }
     
-    private float shortenFloat(float f, int dig)
-    {
-        return (float) (Math.round(f * Math.pow(10, dig)) / Math.pow(10, dig));
-    }
-    
     private double shortenDouble(double d, int dig)
     {
         return Math.round(d * Math.pow(10, dig)) / Math.pow(10, dig);
