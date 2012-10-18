@@ -76,12 +76,12 @@ public class CustomVectorFlag extends CustomFlag<Vector> {
 
     @Override
     public Vector loadFromDb(String str) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        return this.unmarshal(str);
     }
 
     @Override
     public String saveToDb(Vector o) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        return (String) this.marshal(o);
     }
     
     private Vector stringToVector(String string)
