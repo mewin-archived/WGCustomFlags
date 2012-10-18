@@ -4,8 +4,6 @@
  */
 package com.mewin.WGCustomFlags.data;
 
-import com.sk89q.worldguard.protection.flags.Flag;
-import java.util.HashMap;
 import org.bukkit.World;
 
 /**
