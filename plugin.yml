@@ -1,6 +1,6 @@
 name: WGCustomFlags
 main: com.mewin.WGCustomFlags.WGCustomFlagsPlugin
-version: 1.2.4
+version: 1.2.5
 depend: [WorldGuard]
 description: Allows other plugins to hook into WorldGuard and set own flags
 author: mewin
