@@ -230,7 +230,9 @@ public class WGCustomFlagsPlugin extends JavaPlugin {
             customFlags.put(flag.getName(), flag);
 
             addWGFlag(flag);
-            
+
+            getServer().getLogger().log(Level.INFO, "[" + this.getDescription().getName() + "] Added custom flag \"{0}\" to WorldGuard.", flag.getName());
+
             loadAllWorlds();
         }
     }
