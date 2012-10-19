@@ -52,26 +52,45 @@ public class WGCustomFlagsListener implements Listener {
     @EventHandler
     public void onPlayerCommandPreprocess(PlayerCommandPreprocessEvent e)
     {
-        String msg = e.getMessage().toLowerCase().trim();
-        if (!e.getPlayer().hasPermission("worldguard.region.save") || (!msg.startsWith("/rg save") && !msg.startsWith("/region save")))
+        
+        String[] split = e.getMessage().toLowerCase().trim().split(" ");
+        if ((!split[0].equals("/rg") && !split[0].equals("/region")) || split.length < 2)
         {
             return;
         }
         
-        String[] split = msg.split(" ");
-        
-        if (split.length <= 2)
+        if (split[1].equals("save") && e.getPlayer().hasPermission("worldguard.region.save"))
         {
-            plugin.saveAllWorlds();
-        }
-        else
-        {
-            World w = plugin.getServer().getWorld(split[2]);
-            
-            if (w != null)
+            if (split.length <= 2)
             {
-                plugin.saveFlagsForWorld(w);
+                plugin.saveAllWorlds();
             }
+            else
+            {
+                World w = plugin.getServer().getWorld(split[2]);
+
+                if (w != null)
+                {
+                    plugin.saveFlagsForWorld(w);
+                }
+            }   
+        }
+        
+        else if (split[1].equals("load") && e.getPlayer().hasPermission("worldguard.region.load"))
+        {
+            if (split.length <= 2)
+            {
+                plugin.loadAllWorlds();
+            }
+            else
+            {
+                World w = plugin.getServer().getWorld(split[2]);
+
+                if (w != null)
+                {
+                    plugin.loadFlagsForWorld(w);
+                }
+            }   
         }
     }
 }
