@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package com.mewin.WGCustomFlags.flags;
 
 import com.sk89q.minecraft.util.commands.CommandException;
@@ -65,8 +61,7 @@ public class CustomLocationFlag extends CustomFlag<Location> {
                             ),
                             yaw, pitch
                     );
-                } catch (NumberFormatException e) {
-                }
+                } catch (NumberFormatException e) { }
             }
 
             throw new InvalidFlagFormat("Expected 'here' or x,y,z.");
@@ -105,13 +100,11 @@ public class CustomLocationFlag extends CustomFlag<Location> {
     public String saveToDb(Location o) {
         return (String) this.marshal(o);
     }
-    
-    private Location stringToLocation(String string)
-    {
+
+    private Location stringToLocation(String string) {
         String[] split = string.split("\\|");
 
-            if (split.length < 6)
-            {
+            if (split.length < 6) {
                 return null;
             }
 
@@ -119,25 +112,22 @@ public class CustomLocationFlag extends CustomFlag<Location> {
                     new Vector(Double.valueOf(split[1]), Double.valueOf(split[2]), Double.valueOf(split[3])), 
                     Float.valueOf(split[4]), Float.valueOf(split[5]));
     }
-    
-    private String locationToString(Location loc)
-    {
+
+    private String locationToString(Location loc) {
         String ret = "";
-        
+
         ret += loc.getWorld().getName() + "|" + Double.toString(shortenDouble(loc.getPosition().getX(), 2)) + "|";
         ret += Double.toString(shortenDouble(loc.getPosition().getY(), 2)) + "|" + Double.toString(shortenDouble(loc.getPosition().getZ(), 2));
         ret += "|" + Float.toString(shortenFloat(loc.getYaw(), 2)) + "|" + Float.toString(shortenFloat(loc.getPitch(), 2));
-        
+
         return ret;
     }
-    
-    private float shortenFloat(float f, int dig)
-    {
+
+    private float shortenFloat(float f, int dig) {
         return (float) (Math.round(f * Math.pow(10, dig)) / Math.pow(10, dig));
     }
-    
-    private double shortenDouble(double d, int dig)
-    {
+
+    private double shortenDouble(double d, int dig) {
         return Math.round(d * Math.pow(10, dig)) / Math.pow(10, dig);
     }
 }

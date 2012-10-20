@@ -5,4 +5,3 @@ depend: [ WorldGuard ]
 description: Allows other plugins to hook into WorldGuard and set own flags
 author: mewin
 website: http://dev.bukkit.org/server-mods/worldguard-custom-flags/
-softdepend: [ WorldEdit ]

@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package com.mewin.WGCustomFlags.flags;
 
 import com.sk89q.minecraft.util.commands.CommandException;
@@ -43,8 +39,7 @@ public class CustomVectorFlag extends CustomFlag<Vector> {
                             Double.parseDouble(split[1]),
                             Double.parseDouble(split[2])
                     );
-                } catch (NumberFormatException e) {
-                }
+                } catch (NumberFormatException e) { }
             }
 
             throw new InvalidFlagFormat("Expected 'here' or x,y,z.");
@@ -71,7 +66,6 @@ public class CustomVectorFlag extends CustomFlag<Vector> {
         } else {
             return 0;
         }
-
     }
 
     @Override
@@ -83,32 +77,28 @@ public class CustomVectorFlag extends CustomFlag<Vector> {
     public String saveToDb(Vector o) {
         return (String) this.marshal(o);
     }
-    
-    private Vector stringToVector(String string)
-    {
+
+    private Vector stringToVector(String string) {
         String[] split = string.split("\\|");
 
-            if (split.length < 3)
-            {
+            if (split.length < 3) {
                 return null;
             }
 
             return new Vector(Double.valueOf(split[0]), Double.valueOf(split[1]), Double.valueOf(split[2]));
     }
-    
-    private String vectorToString(Vector vec)
-    {
+
+    private String vectorToString(Vector vec) {
         String ret = "";
-        
+
         ret += Double.toString(shortenDouble(vec.getX(), 2)) + "|";
         ret += Double.toString(shortenDouble(vec.getY(), 2)) + "|";
         ret += Double.toString(shortenDouble(vec.getZ(), 2));
-        
+
         return ret;
     }
-    
-    private double shortenDouble(double d, int dig)
-    {
+
+    private double shortenDouble(double d, int dig) {
         return Math.round(d * Math.pow(10, dig)) / Math.pow(10, dig);
     }
 }

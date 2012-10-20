@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package com.mewin.WGCustomFlags.flags;
 
 import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
@@ -23,7 +19,7 @@ import org.bukkit.command.CommandSender;
  * @author patrick
  */
 public class CustomSetFlag<T> extends CustomFlag<Set<T>> {
-    
+
     private Flag<T> subFlag;
 
     public CustomSetFlag(String name, RegionGroup defaultGroup, Flag<T> subFlag) {
@@ -87,40 +83,36 @@ public class CustomSetFlag<T> extends CustomFlag<Set<T>> {
     public String saveToDb(Set<T> o) {
         return (String) this.marshal(o);
     }
-    
-    private String listToString(List<Object> list)
-    {
+
+    private String listToString(List<Object> list) {
         String str = "";
         Iterator<Object> itr = list.iterator();
-        
-        while(itr.hasNext())
-        {
+
+        while(itr.hasNext()) {
             str += String.valueOf(itr.next()).replace("\\", "\\\\").replace(";", "\\;") + ";";
         }
-        
+
         return str;
     }
-    
-    private List<Object> stringToList(String string)
-    {
+
+    private List<Object> stringToList(String string) {
         ArrayList<Object> list = new ArrayList<>();
         Pattern pattern = Pattern.compile("[^\\\\](\\\\\\\\)*;");
-        
+
         Matcher matcher = pattern.matcher(string);
-        while(matcher.find())
-        {
+        while(matcher.find()) {
             int pos = matcher.end();
-            
+
             list.add(string.substring(0, pos - 1));
-            
+
             string = string.substring(pos);
-            
+
             matcher = pattern.matcher(string);
         }
         if (!string.trim().equalsIgnoreCase("")) {
             list.add(string);
         }
-        
+
         return list;
     }
 }
