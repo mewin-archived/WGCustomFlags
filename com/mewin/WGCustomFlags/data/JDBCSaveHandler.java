@@ -122,7 +122,6 @@ public class JDBCSaveHandler implements FlagSaveHandler {
                         connection.clearWarnings();
                         
                         Statement st2 = connection.createStatement();
-                        plugin.getLogger().log(Level.INFO, "[DEBUG] Executing {0}", nextSql);
                         st2.execute(nextSql);
                         
                         SQLWarning warning = connection.getWarnings();
