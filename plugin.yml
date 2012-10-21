@@ -1,7 +1,9 @@
 name: WGCustomFlags
 main: com.mewin.WGCustomFlags.WGCustomFlagsPlugin
+description: API for Bukkit plugin writers that allows you to add custom flags to WorldGuard regions.
 version: 1.2.5
+
+authors: [ mewin ]
 depend: [ WorldGuard ]
-description: Allows other plugins to hook into WorldGuard and set own flags
-author: mewin
+softdepend: [ WorldEdit ]
 website: http://dev.bukkit.org/server-mods/worldguard-custom-flags/
