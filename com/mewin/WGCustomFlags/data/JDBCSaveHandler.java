@@ -300,4 +300,12 @@ public class JDBCSaveHandler implements FlagSaveHandler {
     private double shortenDouble(double d, int dig) {
         return Math.round(d * Math.pow(10, dig)) / Math.pow(10, dig);
     }
+
+    public void close() {
+        try {
+            connection.close();
+        } catch (SQLException ex) {
+            plugin.getLogger().log(Level.SEVERE, "Could not close database connection: ", ex);
+        }
+    }
 }
