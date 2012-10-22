@@ -1,6 +1,18 @@
 /*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
+ * Copyright (C) 2012 patrick
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 package com.mewin.WGCustomFlags.flags;
 
@@ -23,7 +35,7 @@ import org.bukkit.command.CommandSender;
  * @author patrick
  */
 public class CustomSetFlag<T> extends CustomFlag<Set<T>> {
-    
+
     private Flag<T> subFlag;
 
     public CustomSetFlag(String name, RegionGroup defaultGroup, Flag<T> subFlag) {
@@ -87,40 +99,36 @@ public class CustomSetFlag<T> extends CustomFlag<Set<T>> {
     public String saveToDb(Set<T> o) {
         return (String) this.marshal(o);
     }
-    
-    private String listToString(List<Object> list)
-    {
+
+    private String listToString(List<Object> list) {
         String str = "";
         Iterator<Object> itr = list.iterator();
-        
-        while(itr.hasNext())
-        {
+
+        while(itr.hasNext()) {
             str += String.valueOf(itr.next()).replace("\\", "\\\\").replace(";", "\\;") + ";";
         }
-        
+
         return str;
     }
-    
-    private List<Object> stringToList(String string)
-    {
+
+    private List<Object> stringToList(String string) {
         ArrayList<Object> list = new ArrayList<>();
         Pattern pattern = Pattern.compile("[^\\\\](\\\\\\\\)*;");
-        
+
         Matcher matcher = pattern.matcher(string);
-        while(matcher.find())
-        {
+        while(matcher.find()) {
             int pos = matcher.end();
-            
+
             list.add(string.substring(0, pos - 1));
-            
+
             string = string.substring(pos);
-            
+
             matcher = pattern.matcher(string);
         }
         if (!string.trim().equalsIgnoreCase("")) {
             list.add(string);
         }
-        
+
         return list;
     }
 }
