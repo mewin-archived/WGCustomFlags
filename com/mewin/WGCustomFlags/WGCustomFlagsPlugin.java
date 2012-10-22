@@ -40,7 +40,7 @@ public class WGCustomFlagsPlugin extends JavaPlugin {
                                                + "# values: auto - detect which option WorldGuard uses, flat - force flat file usage\r\n"
                                                + "save-handler: auto";
     
-    private JDBCSaveHandler jdbcConnector;
+    private JDBCSaveHandler jdbcConnector = null;
     private WGCustomFlagsListener listener;
     
     public static HashMap<String, Flag> customFlags;
@@ -155,6 +155,10 @@ public class WGCustomFlagsPlugin extends JavaPlugin {
     @Override
     public void onDisable()
     {
+        if (jdbcConnector != null)
+        {
+            jdbcConnector.close();
+        }
         saveAllWorlds();
     }
     
