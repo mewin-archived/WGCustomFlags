@@ -59,10 +59,15 @@ import org.bukkit.World;
 public class JDBCSaveHandler implements FlagSaveHandler {
     private Connection connection;
     private WGCustomFlagsPlugin plugin;
+    private String dns, username, password;
 
     public JDBCSaveHandler(String dns, String username, String password, WGCustomFlagsPlugin plugin){
         this.plugin = plugin;
         try {
+            this.dns = dns;
+            this.username = username;
+            this.password = password;
+            
             connection = DriverManager.getConnection(dns, username, password);
 
             if (connection.isReadOnly()){
@@ -70,6 +75,40 @@ public class JDBCSaveHandler implements FlagSaveHandler {
             }
         } catch (SQLException ex) {
             plugin.getLogger().log(Level.SEVERE, "Could not connect to database.", ex);
+        }
+    }
+    
+    private void attemptReconnect()
+    {
+        try {
+            if (connection.isClosed())
+            {
+                reconnect();
+            }
+            else
+            {
+                Statement testStatement = connection.createStatement();
+
+                testStatement.executeQuery("SELECT 1;");
+            }
+        } catch (SQLException ex) {
+            reconnect();
+        }
+    }
+    
+    private void reconnect()
+    {
+        try {
+            connection.close();
+        } catch (Exception ex) {}
+        try {
+            connection = DriverManager.getConnection(dns, username, password);
+            
+            if (connection.isReadOnly()){
+                plugin.getLogger().severe("Database connection is read-only!");
+            }
+        } catch (Exception ex) {
+            plugin.getLogger().log(Level.SEVERE, "Could not reconnect to database.", ex);
         }
     }
 
@@ -80,6 +119,7 @@ public class JDBCSaveHandler implements FlagSaveHandler {
             plugin.getLogger().info("Regions not activated, no flags saved.");
             return;
         }
+        attemptReconnect();
         Iterator<Entry<String, ProtectedRegion>> itr = regionManager.getRegions().entrySet().iterator();
 
         Statement st;
@@ -147,6 +187,7 @@ public class JDBCSaveHandler implements FlagSaveHandler {
     }
 
     private String getFlagValue(Flag flag, Object value) {
+        attemptReconnect();
         String nextSql = "";
         if (flag instanceof BooleanFlag) {
             nextSql += Boolean.toString((Boolean) value);
@@ -206,6 +247,7 @@ public class JDBCSaveHandler implements FlagSaveHandler {
         if (regionManager == null) {
             return;
         }
+        attemptReconnect();
         try {
             CallableStatement st = connection.prepareCall("SELECT * FROM worldflags WHERE world = '" + world.getName() + "'");
 
