@@ -42,6 +42,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import org.bukkit.World;
 
@@ -142,7 +143,7 @@ public class YAMLSaveHandler implements FlagSaveHandler {
 
             Flag subFlag = (Flag) ClassHacker.getPrivateValue((SetFlag) flag, "subFlag");
 
-            value = new HashSet<>();
+            value = new HashSet<Object>();
 
             Iterator<Object> itr = list.iterator();
 
@@ -180,9 +181,9 @@ public class YAMLSaveHandler implements FlagSaveHandler {
             return;
         }
         Map<String, ProtectedRegion> regions = regionManager.getRegions();
-        Iterator<Map.Entry<String, ProtectedRegion>> itr = regions.entrySet().iterator();
+        Iterator<Entry<String, ProtectedRegion>> itr = regions.entrySet().iterator();
 
-        ArrayList<Object> regionList = new ArrayList<>();
+        ArrayList<Object> regionList = new ArrayList<Object>();
 
         while(itr.hasNext()) {
             Map.Entry<String, ProtectedRegion> entry = itr.next();
@@ -191,7 +192,7 @@ public class YAMLSaveHandler implements FlagSaveHandler {
             Map<Flag<?>, Object> flags = region.getFlags();
             Iterator<Map.Entry<Flag<?>, Object>> itr2 = flags.entrySet().iterator();
 
-            HashMap<String, Object> values = new HashMap<>();
+            HashMap<String, Object> values = new HashMap<String, Object>();
 
             while(itr2.hasNext()) {
                 Map.Entry<Flag<?>, Object> regionFlag = itr2.next();
@@ -209,7 +210,7 @@ public class YAMLSaveHandler implements FlagSaveHandler {
                 continue;
             }
 
-            HashMap<String, Object> flagMap = new HashMap<>();
+            HashMap<String, Object> flagMap = new HashMap<String, Object>();
 
             flagMap.put("region", regionName);
             flagMap.put("flags", values);
@@ -237,7 +238,7 @@ public class YAMLSaveHandler implements FlagSaveHandler {
         if (flag instanceof LocationFlag) {
             Location loc = (Location) value;
 
-            HashMap<String, Object> locMap = new HashMap<>();
+            HashMap<String, Object> locMap = new HashMap<String, Object>();
 
             locMap.put("world", loc.getWorld().getName());
             locMap.put("x", loc.getPosition().getX());
@@ -251,7 +252,7 @@ public class YAMLSaveHandler implements FlagSaveHandler {
 
         if (flag instanceof VectorFlag) {
             Vector vec = (Vector) value;
-            HashMap<String, Object> vecMap = new HashMap<>();
+            HashMap<String, Object> vecMap = new HashMap<String, Object>();
 
             vecMap.put("x", vec.getX());
             vecMap.put("y", vec.getY());
@@ -264,7 +265,7 @@ public class YAMLSaveHandler implements FlagSaveHandler {
             Flag subFlag = (Flag) ClassHacker.getPrivateValue((SetFlag) flag, "subFlag");
 
             Set<?> set = (Set<?>) value;
-            value = new ArrayList<>();
+            value = new ArrayList<Object>();
 
             Iterator<?> itr = set.iterator();
 

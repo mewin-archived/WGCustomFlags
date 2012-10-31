@@ -32,7 +32,7 @@ public final class ClassHacker {
             modifier.setAccessible(true);
             modifier.setInt(field, field.getModifiers() & ~Modifier.FINAL);
             field.set(null, value);
-        } catch(NoSuchFieldException | SecurityException | IllegalArgumentException | IllegalAccessException ex) { }
+        } catch(Exception ex) { }
     }
 
     public static void setPrivateValue(Object obj, String name, Object value) {
@@ -44,7 +44,7 @@ public final class ClassHacker {
             //Logger.getLogger(ClassHacker.class.getName()).log(Level.SEVERE, null, ex);
         } catch (IllegalAccessException ex) {
            // Logger.getLogger(ClassHacker.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (NoSuchFieldException | SecurityException ex) {
+        } catch (Exception ex) {
             //Logger.getLogger(ClassHacker.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
@@ -54,7 +54,7 @@ public final class ClassHacker {
             Field field = obj.getClass().getDeclaredField(name);
             field.setAccessible(true);
             return field.get(obj);
-        } catch(NoSuchFieldException | SecurityException | IllegalArgumentException | IllegalAccessException ex) {
+        } catch(Exception ex) {
             return null;
         }
     }

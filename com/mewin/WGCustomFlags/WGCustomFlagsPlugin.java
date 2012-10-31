@@ -67,7 +67,7 @@ public class WGCustomFlagsPlugin extends JavaPlugin {
      */
     public WGCustomFlagsPlugin() {
         super();
-        customFlags = new HashMap<>();
+        customFlags = new HashMap<String, Flag>();
         listener = new WGCustomFlagsListener(this);
     }
 
@@ -148,6 +148,7 @@ public class WGCustomFlagsPlugin extends JavaPlugin {
     @Override
     public void onDisable()
     {
+        saveAllWorlds();
         if (jdbcConnector != null)
         {
             jdbcConnector.close();
@@ -236,7 +237,7 @@ public class WGCustomFlagsPlugin extends JavaPlugin {
 
             ClassHacker.setStaticValue(flagField, flags);
         }
-        catch(NoSuchFieldException | RuntimeException ex) {
+        catch(Exception ex) {
             getServer().getLogger().log(Level.WARNING, "Could not add flag {0} to WorldGuard", flag.getName());
         }
 

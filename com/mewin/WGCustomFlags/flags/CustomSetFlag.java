@@ -57,7 +57,7 @@ public class CustomSetFlag<T> extends CustomFlag<Set<T>> {
             items.add(subFlag.parseInput(plugin, sender, str.trim()));
         }
 
-        return new HashSet<>(items);
+        return new HashSet<T>(items);
     }
 
     @Override
@@ -82,7 +82,7 @@ public class CustomSetFlag<T> extends CustomFlag<Set<T>> {
 
     @Override
     public Object marshal(Set<T> o) {
-        List<Object> list = new ArrayList<>();
+        List<Object> list = new ArrayList<Object>();
         for (T item : o) {
             list.add(subFlag.marshal(item));
         }
@@ -112,7 +112,7 @@ public class CustomSetFlag<T> extends CustomFlag<Set<T>> {
     }
 
     private List<Object> stringToList(String string) {
-        ArrayList<Object> list = new ArrayList<>();
+        ArrayList<Object> list = new ArrayList<Object>();
         Pattern pattern = Pattern.compile("[^\\\\](\\\\\\\\)*;");
 
         Matcher matcher = pattern.matcher(string);

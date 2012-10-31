@@ -266,7 +266,7 @@ public class JDBCSaveHandler implements FlagSaveHandler {
 
                 setRegionFlag(region, flag, value);
             }
-        } catch (SQLException | NumberFormatException ex) {
+        } catch (Exception ex) {
             Logger.getLogger(JDBCSaveHandler.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
@@ -308,7 +308,7 @@ public class JDBCSaveHandler implements FlagSaveHandler {
             Pattern p = Pattern.compile("[^\\\\](\\\\\\\\)*;");
             Matcher matcher = p.matcher(value);
             Flag subFlag = (Flag) ClassHacker.getPrivateValue((SetFlag) flag, "subFlag");
-            HashSet<Object> splits = new HashSet<>();
+            HashSet<Object> splits = new HashSet<Object>();
 
             while(matcher.find()) {                
                 splits.add(getFlagValue(region, subFlag, value.substring(0, matcher.end() - 1)));
