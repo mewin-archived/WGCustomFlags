@@ -233,7 +233,7 @@ public class JDBCSaveHandler implements FlagSaveHandler {
         } else if (flag instanceof CustomFlag) {
             nextSql += ((CustomFlag) flag).saveToDb(value);
         } else {
-            System.out.println("This should not happen either.");
+            System.out.println("If you read this please report it to mewin.");
             return null;
         }
 
