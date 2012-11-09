@@ -77,7 +77,7 @@ public class WGCustomFlagsPlugin extends JavaPlugin {
     private void setupWgPlugin() {
         Plugin plug = getServer().getPluginManager().getPlugin("WorldGuard");
         if(plug == null || !(plug instanceof WorldGuardPlugin)) {
-            System.out.println("WorldGuard plugin not found, disabling.");
+            getLogger().warning("WorldGuard plugin not found, disabling.");
 
             getServer().getPluginManager().disablePlugin(this);
         } else {
