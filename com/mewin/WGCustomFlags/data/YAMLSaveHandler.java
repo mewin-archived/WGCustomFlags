@@ -44,6 +44,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.logging.Level;
 import org.bukkit.World;
 
 /**
@@ -60,11 +61,16 @@ public class YAMLSaveHandler implements FlagSaveHandler {
 
     @Override
     public void loadFlagsForWorld(World world) {
+        if (world == null)
+        {
+            plugin.getLogger().log(Level.WARNING, "World object is null.");
+            return;
+        }
         YAMLProcessor worldConfig = new YAMLProcessor(new File(wgPlugin.getDataFolder(), "worlds/" + world.getName() + "/customFlags.yml"), true, YAMLFormat.EXTENDED);
         try {
             worldConfig.load();
         } catch (IOException ex) {
-            System.out.println("No configuration found for world " + world.getName() + ". Will be created when saved.");
+            plugin.getLogger().log(Level.INFO, "No configuration found for world {0}. Will be created when saved.", world.getName());
             return;
         }
 
@@ -83,7 +89,7 @@ public class YAMLSaveHandler implements FlagSaveHandler {
                 String regionName = node.getString("region", null);
 
                 if(regionName == null) {
-                    System.out.println("region name is null");
+                    plugin.getLogger().warning("region name is null");
                     continue;
                 }
 
@@ -92,7 +98,7 @@ public class YAMLSaveHandler implements FlagSaveHandler {
                 YAMLNode flags = node.getNode("flags");
 
                 if(flags == null) {
-                    System.out.println("flags is null");
+                    plugin.getLogger().warning("flags is null");
                     continue;
                 }
 
@@ -121,7 +127,6 @@ public class YAMLSaveHandler implements FlagSaveHandler {
         }
 
         if (flag instanceof StateFlag) {
-            System.out.print("StateFlag");
             value = StateFlag.State.valueOf((String) value);
         }
 
@@ -221,7 +226,7 @@ public class YAMLSaveHandler implements FlagSaveHandler {
         worldConfig.setProperty("regions", regionList);
 
         if(!worldConfig.save()) {
-            System.out.println("Failed to save config for world " + world.getName());
+            plugin.getLogger().log(Level.WARNING, "Failed to save config for world {0}", world.getName());
         }
     }
 
