@@ -256,14 +256,4 @@ public class WGCustomFlagsPlugin extends JavaPlugin {
             return new YAMLSaveHandler(this, wgPlugin);
         }
     }
-    
-    /**
-     * retrieves the ClassLoader of this plugin
-     * there is no reason to call this from another plugin
-     * @return the ClassLoader
-     */
-    @Override
-    public ClassLoader getClassLoader() {
-        return super.getClassLoader();
-    }
 }
