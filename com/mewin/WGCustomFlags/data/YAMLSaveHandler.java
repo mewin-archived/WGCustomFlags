@@ -56,6 +56,7 @@ public class YAMLSaveHandler implements FlagSaveHandler {
     private WorldGuardPlugin wgPlugin;
 
     public YAMLSaveHandler(WGCustomFlagsPlugin plugin, WorldGuardPlugin wgPlugin) {
+        this.plugin = plugin;
         this.wgPlugin = wgPlugin;
     }
 
