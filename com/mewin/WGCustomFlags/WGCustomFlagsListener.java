@@ -17,6 +17,7 @@
 package com.mewin.WGCustomFlags;
 
 import org.bukkit.World;
+import org.bukkit.command.Command;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
@@ -83,6 +84,15 @@ public class WGCustomFlagsListener implements Listener {
                     plugin.loadFlagsForWorld(w);
                 }
             }   
+        } else if (split[0].equals("/worldguard") || split[0].equals("/wg")) {
+            if (split[1].equals("reload") && e.getPlayer().hasPermission("worldguard.reload")) //?
+            {
+                Command cmd = plugin.getCommand("wg");
+                if(cmd.execute(e.getPlayer(), split[0], new String[] {"reload"}))
+                {
+                    plugin.loadAllWorlds();
+                }
+            }
         }
     }
 }
