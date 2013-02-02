@@ -256,9 +256,18 @@ public class WGCustomFlagsPlugin extends JavaPlugin {
             }
         }
     }
+    
+    /**
+     * retrieves the custom flag configuration
+     * @return a YAMLProcessor representing the configuration of the plugin
+     */
+    public YAMLProcessor getConf()
+    {
+        return this.config;
+    }
 
     private FlagSaveHandler getSaveHandler() {
-        if (config.getString("save-handler", "auto").equals("auto") && wgPlugin.getGlobalStateManager().useSqlDatabase) {
+        if (config.getString("save-handler", "auto").equalsIgnoreCase("auto") && wgPlugin.getGlobalStateManager().useSqlDatabase) {
             return jdbcConnector;
         } else {
             return new YAMLSaveHandler(this, wgPlugin);
