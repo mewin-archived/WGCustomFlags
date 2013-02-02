@@ -3,6 +3,7 @@ package com.mewin.util;
 import com.mewin.WGCustomFlags.flags.CustomSetFlag;
 import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
 import com.sk89q.worldguard.protection.ApplicableRegionSet;
+import com.sk89q.worldguard.protection.flags.Flag;
 import com.sk89q.worldguard.protection.managers.RegionManager;
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
 import java.util.HashMap;
@@ -82,6 +83,74 @@ public final class Util {
             } else {
                 return true;
             }
+        }
+    }
+    
+    public static <T> T getFlagValue(WorldGuardPlugin wgp, Location loc, Flag<T> flag)
+    {
+        RegionManager rm = wgp.getRegionManager(loc.getWorld());
+        if (rm == null)
+        {
+            return null;
+        }
+        ApplicableRegionSet regions = rm.getApplicableRegions(loc);
+        Iterator<ProtectedRegion> itr = regions.iterator();
+        Map<ProtectedRegion, T> regionsToCheck = new HashMap<ProtectedRegion, T>();
+        Set<ProtectedRegion> ignoredRegions = new HashSet<ProtectedRegion>();
+        
+        while(itr.hasNext()) {
+            ProtectedRegion region = itr.next();
+            
+            if (ignoredRegions.contains(region) 
+                    || region.getFlag(flag) == null) {
+                continue;
+            }
+            
+            ProtectedRegion parent = region.getParent();
+            
+            while(parent != null) {
+                ignoredRegions.add(parent);
+
+                parent = parent.getParent();
+            }
+
+            regionsToCheck.put(region, (T) region.getFlag(flag));
+        }
+        
+        if (regionsToCheck.size() >= 1) {
+            Iterator<Map.Entry<ProtectedRegion, T>> itr2 = regionsToCheck.entrySet().iterator();
+            int minPriority = Integer.MIN_VALUE;
+            T returnValue = null;
+            
+            while(itr2.hasNext()) {
+                Map.Entry<ProtectedRegion, T> entry = itr2.next();
+                
+                ProtectedRegion region = entry.getKey();
+                T value = entry.getValue();
+                
+                if (ignoredRegions.contains(region)) {
+                    continue;
+                }
+                
+                if (region.getPriority() < minPriority || region.getPriority() == minPriority)
+                {
+                    continue;
+                }
+                
+                minPriority = region.getPriority();
+                returnValue = value;
+            }
+            
+            return returnValue;
+        } else {
+            ProtectedRegion global = rm.getRegion("__global__");
+            if (rm == null || global == null)
+            {
+                return null;
+            }
+            T value = global.getFlag(flag);
+            
+            return value;
         }
     }
     
