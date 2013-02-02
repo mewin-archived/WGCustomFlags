@@ -57,7 +57,7 @@ public class WGCustomFlagsListener implements Listener {
         this.plugin.saveFlagsForWorld(e.getWorld());
     }
 
-    @EventHandler
+    /*@EventHandler
     public void onPlayerCommandPreprocess(PlayerCommandPreprocessEvent e) {
         String[] split = e.getMessage().toLowerCase().trim().split(" ");
         if ((!split[0].equals("/rg") && !split[0].equals("/region")) || split.length < 2) {
@@ -92,7 +92,8 @@ public class WGCustomFlagsListener implements Listener {
                 {
                     plugin.loadAllWorlds();
                 }
+                e.setCancelled(true);
             }
         }
-    }
+    }*/
 }
