@@ -22,6 +22,7 @@ import org.bukkit.command.Command;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
+import org.bukkit.event.server.ServerCommandEvent;
 import org.bukkit.event.world.WorldInitEvent;
 import org.bukkit.event.world.WorldLoadEvent;
 import org.bukkit.event.world.WorldSaveEvent;
@@ -75,12 +76,53 @@ public class WGCustomFlagsListener implements Listener {
             }
         }
     }
+    
+    @EventHandler
+    public void onServerCommand(ServerCommandEvent e)
+    {
+        String[] split = e.getCommand().toLowerCase().trim().split(" ");
+        if (split.length > 1 && split[0].equalsIgnoreCase("/wg") || split[0].equalsIgnoreCase("/worldguard")
+                && split[1].equalsIgnoreCase("reload") && e.getSender().hasPermission("worldguard.reload"))
+        {
+            Bukkit.getScheduler().runTaskLaterAsynchronously(plugin, new Runnable()
+            {
+                @Override
+                public void run()
+                {
+                    plugin.loadAllWorlds();
+                }
+            }, 10L); //give wg enough time to reload
+        }
+        else if ((split[0].equalsIgnoreCase("rg") || split[0].equalsIgnoreCase("region")) && split[1].equals("save")
+                 && e.getSender().hasPermission("worldguard.region.save")) {
+            if (split.length <= 2) {
+                plugin.saveAllWorlds();
+            } else {
+                World w = plugin.getServer().getWorld(split[2]);
+
+                if (w != null) {
+                    plugin.saveFlagsForWorld(w);
+                }
+            }   
+        } else if ((split[0].equalsIgnoreCase("rg") || split[0].equalsIgnoreCase("region")) && split[1].equals("load")
+                && e.getSender().hasPermission("worldguard.region.save")) {
+            if (split.length <= 2) {
+                plugin.loadAllWorlds();
+            } else {
+                World w = plugin.getServer().getWorld(split[2]);
+
+                if (w != null) {
+                    plugin.loadFlagsForWorld(w);
+                }
+            }   
+        }
+    }
 
     @EventHandler
     public void onPlayerCommandPreprocess(PlayerCommandPreprocessEvent e) {
         String[] split = e.getMessage().toLowerCase().trim().split(" ");
         if (split.length > 1 && split[0].equalsIgnoreCase("/wg") || split[0].equalsIgnoreCase("/worldguard")
-                && split[1].equalsIgnoreCase("reload"))
+                && split[1].equalsIgnoreCase("reload") && e.getPlayer().hasPermission("worldguard.reload"))
         {
             Bukkit.getScheduler().runTaskLaterAsynchronously(plugin, new Runnable()
             {
