@@ -16,11 +16,8 @@
  */
 package com.mewin.WGCustomFlags;
 
-import org.bukkit.World;
-import org.bukkit.command.Command;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.world.WorldInitEvent;
 import org.bukkit.event.world.WorldLoadEvent;
 import org.bukkit.event.world.WorldSaveEvent;
