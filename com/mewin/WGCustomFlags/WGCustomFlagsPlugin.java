@@ -196,7 +196,7 @@ public class WGCustomFlagsPlugin extends JavaPlugin {
      * @param world the world to save the flags for
      */
     public void saveFlagsForWorld(World world) {
-        getLogger().log(Level.INFO, "Saving flags for world {0}", world.getName());
+        getLogger().log(Level.FINEST, "Saving flags for world {0}", world.getName());
         FlagSaveHandler handler = getSaveHandler();
 
         handler.saveFlagsForWorld(world);
