@@ -48,9 +48,17 @@ public class WGCustomFlagsPlugin extends JavaPlugin {
                                                + "\r\n"
                                                + "# name: save-handler\r\n"
                                                + "# default: auto\r\n"
-                                               + "# description: determines wheter a database or a flat file is used to save the flags\r\n"
+                                               + "# description: determines whether a database or a flat file is used to save the flags\r\n"
                                                + "# values: auto - detect which option WorldGuard uses, flat - force flat file usage\r\n"
-                                               + "save-handler: auto";
+                                               + "save-handler: auto\r\n"
+                                               + "# name: flag-saving\r\n"
+                                               + "# default: unload,save\r\n"
+                                               + "# description: determines when to save the custom flag values\r\n"
+                                               + "# values: one or multiple values of [unload, save, change] seperated with a comma\r\n"
+                                               + "# unload - saves the flags when a world is unloaded (highly recommended as the flags are not saved for world if it is unloaded before the server shuts down)\r\n"
+                                               + "# save - saves the flags everytime a world is saved (can cause lags if you have a plugin like MultiVerse the auto-saves the worlds very often)\r\n"
+                                               + "# change - saves the flags everytime any flag has changed in the world\r\n"
+                                               + "flag-saving: unload,save";
     
     private JDBCSaveHandler jdbcConnector = null;
     private WGCustomFlagsListener listener;
