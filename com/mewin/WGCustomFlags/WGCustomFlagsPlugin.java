@@ -190,7 +190,8 @@ public class WGCustomFlagsPlugin extends JavaPlugin {
      * saves all custom flags to YAML file or database
      * should not be called manually
      */
-    public void saveAllWorlds() {
+    public void saveAllWorlds()
+    {
         Iterator<World> itr = getServer().getWorlds().iterator();
 
         while(itr.hasNext()) {
@@ -203,11 +204,19 @@ public class WGCustomFlagsPlugin extends JavaPlugin {
      * should not be called manually
      * @param world the world to save the flags for
      */
-    public void saveFlagsForWorld(World world) {
+    public void saveFlagsForWorld(final World world)
+    {
         getLogger().log(Level.FINEST, "Saving flags for world {0}", world.getName());
-        FlagSaveHandler handler = getSaveHandler();
+        final FlagSaveHandler handler = getSaveHandler();
 
-        handler.saveFlagsForWorld(world);
+        getServer().getScheduler().runTaskAsynchronously(this, new Runnable()
+        {
+            @Override
+            public void run()
+            {
+                handler.saveFlagsForWorld(world);
+            }
+        });
     }
 
     /**

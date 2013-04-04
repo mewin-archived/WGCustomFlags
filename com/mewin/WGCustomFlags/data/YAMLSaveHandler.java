@@ -207,7 +207,8 @@ public class YAMLSaveHandler implements FlagSaveHandler {
 
                 Object value = valueForFlag(flag, region);
 
-                if (WGCustomFlagsPlugin.customFlags.containsKey(flag.getName())) {
+                if (WGCustomFlagsPlugin.customFlags.containsKey(flag.getName()) && value != null)
+                {
                     values.put(flag.getName(), value);
                 }
             }
@@ -231,14 +232,25 @@ public class YAMLSaveHandler implements FlagSaveHandler {
         }
     }
 
-    private Object valueForFlag(Flag flag, ProtectedRegion region) {
+    private Object valueForFlag(Flag flag, ProtectedRegion region)
+    {
         return valueForFlag(flag, region.getFlag(flag));
     }
 
-    private Object valueForFlag(Flag flag, Object value) {
+    private Object valueForFlag(Flag flag, Object value)
+    {
 
-        if (flag instanceof EnumFlag || flag instanceof StateFlag) {
-            value = ((Enum) value).name();
+        if (flag instanceof EnumFlag || flag instanceof StateFlag)
+        {
+            Enum enumVal = (Enum) value;
+            if (enumVal != null)
+            {
+                value = enumVal.name();
+            }
+            else
+            {
+                value = null;
+            }
         }
 
         if (flag instanceof LocationFlag) {
