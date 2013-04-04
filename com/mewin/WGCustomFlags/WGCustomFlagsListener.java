@@ -93,7 +93,7 @@ public class WGCustomFlagsListener implements Listener {
                 }
             }, 10L); //give wg enough time to reload
         }
-        else if ((split[0].equalsIgnoreCase("rg") || split[0].equalsIgnoreCase("region")) && split[1].equals("save")
+        else if ((split[0].equalsIgnoreCase("rg") || split[0].equalsIgnoreCase("region")) && split.length > 1 && split[1].equals("save")
                  && e.getSender().hasPermission("worldguard.region.save")) {
             if (split.length <= 2) {
                 plugin.saveAllWorlds();
