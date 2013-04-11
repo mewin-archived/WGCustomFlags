@@ -156,7 +156,7 @@ public class WGCustomFlagsPlugin extends JavaPlugin {
     @Override
     public void onDisable()
     {
-        saveAllWorlds();
+        saveAllWorlds(false);
         if (jdbcConnector != null)
         {
             jdbcConnector.close();
@@ -190,12 +190,12 @@ public class WGCustomFlagsPlugin extends JavaPlugin {
      * saves all custom flags to YAML file or database
      * should not be called manually
      */
-    public void saveAllWorlds()
+    public void saveAllWorlds(boolean asynchron)
     {
         Iterator<World> itr = getServer().getWorlds().iterator();
 
         while(itr.hasNext()) {
-            saveFlagsForWorld(itr.next());
+            saveFlagsForWorld(itr.next(), asynchron);
         }
     }
 
@@ -204,19 +204,26 @@ public class WGCustomFlagsPlugin extends JavaPlugin {
      * should not be called manually
      * @param world the world to save the flags for
      */
-    public void saveFlagsForWorld(final World world)
+    public void saveFlagsForWorld(final World world, boolean asynchron)
     {
         getLogger().log(Level.FINEST, "Saving flags for world {0}", world.getName());
         final FlagSaveHandler handler = getSaveHandler();
 
-        getServer().getScheduler().runTaskAsynchronously(this, new Runnable()
+        if (asynchron)
         {
-            @Override
-            public void run()
+            getServer().getScheduler().runTaskAsynchronously(this, new Runnable()
             {
-                handler.saveFlagsForWorld(world);
-            }
-        });
+                @Override
+                public void run()
+                {
+                    handler.saveFlagsForWorld(world);
+                }
+            });
+        }
+        else
+        {
+            handler.saveFlagsForWorld(world);
+        }
     }
 
     /**

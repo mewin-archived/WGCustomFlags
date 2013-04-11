@@ -57,7 +57,7 @@ public class WGCustomFlagsListener implements Listener {
         {
             if (s.trim().equalsIgnoreCase("save"))
             {
-                this.plugin.saveFlagsForWorld(e.getWorld());
+                this.plugin.saveFlagsForWorld(e.getWorld(), true);
                 return;
             }
         }
@@ -71,7 +71,7 @@ public class WGCustomFlagsListener implements Listener {
         {
             if (s.trim().equalsIgnoreCase("unload"))
             {
-                this.plugin.saveFlagsForWorld(e.getWorld());
+                this.plugin.saveFlagsForWorld(e.getWorld(), false);
                 return;
             }
         }
@@ -96,12 +96,12 @@ public class WGCustomFlagsListener implements Listener {
         else if ((split[0].equalsIgnoreCase("rg") || split[0].equalsIgnoreCase("region")) && split.length > 1 && split[1].equals("save")
                  && e.getSender().hasPermission("worldguard.region.save")) {
             if (split.length <= 2) {
-                plugin.saveAllWorlds();
+                plugin.saveAllWorlds(true);
             } else {
                 World w = plugin.getServer().getWorld(split[2]);
 
                 if (w != null) {
-                    plugin.saveFlagsForWorld(w);
+                    plugin.saveFlagsForWorld(w, true);
                 }
             }   
         } else if ((split[0].equalsIgnoreCase("rg") || split[0].equalsIgnoreCase("region")) && split[1].equals("load")
@@ -150,12 +150,12 @@ public class WGCustomFlagsListener implements Listener {
         
         if (split[1].equals("save") && e.getPlayer().hasPermission("worldguard.region.save")) {
             if (split.length <= 2) {
-                plugin.saveAllWorlds();
+                plugin.saveAllWorlds(true);
             } else {
                 World w = plugin.getServer().getWorld(split[2]);
 
                 if (w != null) {
-                    plugin.saveFlagsForWorld(w);
+                    plugin.saveFlagsForWorld(w, true);
                 }
             }   
         } else if (split[1].equals("load") && e.getPlayer().hasPermission("worldguard.region.load")) {
@@ -177,7 +177,7 @@ public class WGCustomFlagsListener implements Listener {
                 @Override
                 public void run()
                 {
-                    plugin.saveFlagsForWorld(w);
+                    plugin.saveFlagsForWorld(w, true);
                 }
             }, 2L); //let wg change the flag first
         }
