@@ -30,6 +30,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.logging.Level;
@@ -243,6 +244,33 @@ public class WGCustomFlagsPlugin extends JavaPlugin {
             getLogger().log(Level.INFO, "Added custom flag \"{0}\" to WorldGuard.", flag.getName());
 
             loadAllWorlds();
+        }
+    }
+    
+    /**
+     * adds flags for all public and static fields of a class that extend Flag
+     * @param clazz the class that contains the flags
+     */
+    public void addCustomFlags(Class clazz) throws Exception
+    {
+        for (Field f : clazz.getDeclaredFields())
+        {
+            try
+            {
+                if (Flag.class.isAssignableFrom(f.getType()) && (f.getModifiers() & (Modifier.STATIC | Modifier.PUBLIC)) > 0)
+                {
+                    f.setAccessible(true);
+                    Flag flag = (Flag) f.get(null);
+                    if (flag != null)
+                    {
+                        addCustomFlag(flag);
+                    }
+                }
+            }
+            catch(Exception ex)
+            {
+                throw new Exception("Could not add custom flag " + f.getName() + " of class " + clazz.getName(), ex);
+            }
         }
     }
 
