@@ -30,6 +30,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.logging.Level;
@@ -156,7 +157,7 @@ public class WGCustomFlagsPlugin extends JavaPlugin {
     @Override
     public void onDisable()
     {
-        saveAllWorlds();
+        saveAllWorlds(false);
         if (jdbcConnector != null)
         {
             jdbcConnector.close();
@@ -190,12 +191,12 @@ public class WGCustomFlagsPlugin extends JavaPlugin {
      * saves all custom flags to YAML file or database
      * should not be called manually
      */
-    public void saveAllWorlds()
+    public void saveAllWorlds(boolean asynchron)
     {
         Iterator<World> itr = getServer().getWorlds().iterator();
 
         while(itr.hasNext()) {
-            saveFlagsForWorld(itr.next());
+            saveFlagsForWorld(itr.next(), asynchron);
         }
     }
 
@@ -204,19 +205,26 @@ public class WGCustomFlagsPlugin extends JavaPlugin {
      * should not be called manually
      * @param world the world to save the flags for
      */
-    public void saveFlagsForWorld(final World world)
+    public void saveFlagsForWorld(final World world, boolean asynchron)
     {
         getLogger().log(Level.FINEST, "Saving flags for world {0}", world.getName());
         final FlagSaveHandler handler = getSaveHandler();
 
-        getServer().getScheduler().runTaskAsynchronously(this, new Runnable()
+        if (asynchron)
         {
-            @Override
-            public void run()
+            getServer().getScheduler().runTaskAsynchronously(this, new Runnable()
             {
-                handler.saveFlagsForWorld(world);
-            }
-        });
+                @Override
+                public void run()
+                {
+                    handler.saveFlagsForWorld(world);
+                }
+            });
+        }
+        else
+        {
+            handler.saveFlagsForWorld(world);
+        }
     }
 
     /**
@@ -236,6 +244,33 @@ public class WGCustomFlagsPlugin extends JavaPlugin {
             getLogger().log(Level.INFO, "Added custom flag \"{0}\" to WorldGuard.", flag.getName());
 
             loadAllWorlds();
+        }
+    }
+    
+    /**
+     * adds flags for all public and static fields of a class that extend Flag
+     * @param clazz the class that contains the flags
+     */
+    public void addCustomFlags(Class clazz) throws Exception
+    {
+        for (Field f : clazz.getDeclaredFields())
+        {
+            try
+            {
+                if (Flag.class.isAssignableFrom(f.getType()) && (f.getModifiers() & (Modifier.STATIC | Modifier.PUBLIC)) > 0)
+                {
+                    f.setAccessible(true);
+                    Flag flag = (Flag) f.get(null);
+                    if (flag != null)
+                    {
+                        addCustomFlag(flag);
+                    }
+                }
+            }
+            catch(Exception ex)
+            {
+                throw new Exception("Could not add custom flag " + f.getName() + " of class " + clazz.getName(), ex);
+            }
         }
     }
 
