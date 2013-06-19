@@ -81,7 +81,7 @@ public class WGCustomFlagsListener implements Listener {
     public void onServerCommand(ServerCommandEvent e)
     {
         String[] split = e.getCommand().toLowerCase().trim().split(" ");
-        if (split.length > 1 && split[0].equalsIgnoreCase("/wg") || split[0].equalsIgnoreCase("/worldguard")
+        if (split.length > 1 && (split[0].equalsIgnoreCase("/wg") || split[0].equalsIgnoreCase("/worldguard"))
                 && split[1].equalsIgnoreCase("reload") && e.getSender().hasPermission("worldguard.reload"))
         {
             Bukkit.getScheduler().runTaskLaterAsynchronously(plugin, new Runnable()
@@ -104,7 +104,7 @@ public class WGCustomFlagsListener implements Listener {
                     plugin.saveFlagsForWorld(w, true);
                 }
             }   
-        } else if ((split[0].equalsIgnoreCase("rg") || split[0].equalsIgnoreCase("region")) && split[1].equals("load")
+        } else if ((split[0].equalsIgnoreCase("rg") || split[0].equalsIgnoreCase("region")) && split.length > 1 && split[1].equals("load")
                 && e.getSender().hasPermission("worldguard.region.save")) {
             if (split.length <= 2) {
                 plugin.loadAllWorlds();
@@ -121,7 +121,7 @@ public class WGCustomFlagsListener implements Listener {
     @EventHandler
     public void onPlayerCommandPreprocess(PlayerCommandPreprocessEvent e) {
         String[] split = e.getMessage().toLowerCase().trim().split(" ");
-        if (split.length > 1 && split[0].equalsIgnoreCase("/wg") || split[0].equalsIgnoreCase("/worldguard")
+        if (split.length > 1 && (split[0].equalsIgnoreCase("/wg") || split[0].equalsIgnoreCase("/worldguard"))
                 && split[1].equalsIgnoreCase("reload") && e.getPlayer().hasPermission("worldguard.reload"))
         {
             Bukkit.getScheduler().runTaskLaterAsynchronously(plugin, new Runnable()
