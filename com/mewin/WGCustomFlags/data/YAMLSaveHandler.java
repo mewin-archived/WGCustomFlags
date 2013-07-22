@@ -16,6 +16,7 @@
  */
 package com.mewin.WGCustomFlags.data;
 
+import com.mewin.WGCustomFlags.FlagManager;
 import com.mewin.WGCustomFlags.WGCustomFlagsPlugin;
 import com.mewin.WGCustomFlags.flags.CustomFlag;
 import com.mewin.WGCustomFlags.util.ClassHacker;
@@ -103,7 +104,7 @@ public class YAMLSaveHandler implements FlagSaveHandler {
                     continue;
                 }
 
-                Iterator<Map.Entry<String, Flag>> itr2 = WGCustomFlagsPlugin.customFlags.entrySet().iterator();
+                Iterator<Map.Entry<String, Flag>> itr2 = FlagManager.customFlags.entrySet().iterator();
 
                 while(itr2.hasNext()) {
                     Map.Entry<String, Flag> next = itr2.next();
@@ -207,7 +208,7 @@ public class YAMLSaveHandler implements FlagSaveHandler {
 
                 Object value = valueForFlag(flag, region);
 
-                if (WGCustomFlagsPlugin.customFlags.containsKey(flag.getName()) && value != null)
+                if (FlagManager.customFlags.containsKey(flag.getName()) && value != null)
                 {
                     values.put(flag.getName(), value);
                 }
