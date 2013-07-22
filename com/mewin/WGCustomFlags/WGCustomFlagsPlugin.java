@@ -23,15 +23,11 @@ import com.mewin.WGCustomFlags.util.ClassHacker;
 import com.sk89q.util.yaml.YAMLFormat;
 import com.sk89q.util.yaml.YAMLProcessor;
 import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
-import com.sk89q.worldguard.protection.flags.DefaultFlag;
 import com.sk89q.worldguard.protection.flags.Flag;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.logging.Level;
 import org.bukkit.World;
@@ -59,12 +55,17 @@ public class WGCustomFlagsPlugin extends JavaPlugin {
                                                + "# unload - saves the flags when a world is unloaded (highly recommended as the flags are not saved for world if it is unloaded before the server shuts down)\r\n"
                                                + "# save - saves the flags everytime a world is saved (can cause lags if you have a plugin like MultiVerse the auto-saves the worlds very often)\r\n"
                                                + "# change - saves the flags everytime any flag has changed in the world\r\n"
-                                               + "flag-saving: unload,save";
+                                               + "flag-saving: unload,save\r\n";
+                                               /*+ "# name: tab-completions\r\n"
+                                               + "# default: false\r\n"
+                                               + "# description: enable/disable experimental tab completions for the region command of WorldGuard\r\n"
+                                               + "# values: true,false\r\n"
+                                               + "tab-completions: false";*/
     
     private JDBCSaveHandler jdbcConnector = null;
     private WGCustomFlagsListener listener;
+    private PluginListener plListener;
 
-    public static HashMap<String, Flag> customFlags;
     public static WorldGuardPlugin wgPlugin;
 
     private File configFile;
@@ -76,8 +77,8 @@ public class WGCustomFlagsPlugin extends JavaPlugin {
      */
     public WGCustomFlagsPlugin() {
         super();
-        customFlags = new HashMap<String, Flag>();
         listener = new WGCustomFlagsListener(this);
+        plListener = new PluginListener();
     }
 
     /**
@@ -138,6 +139,7 @@ public class WGCustomFlagsPlugin extends JavaPlugin {
 
     @Override
     public void onEnable() {
+        FlagManager.setWGCFInstance(this);
         configFile = new File(getDataFolder(), "config.yml");
 
         setupWgPlugin();
@@ -148,8 +150,14 @@ public class WGCustomFlagsPlugin extends JavaPlugin {
         }
 
         getServer().getPluginManager().registerEvents(listener, this);
+        getServer().getPluginManager().registerEvents(plListener, this);
 
         loadConfig();
+        
+        if (config.getBoolean("tab-completions", false))
+        {
+            getServer().getPluginManager().registerEvents(new TabCompleteListener(wgPlugin), this);
+        }
 
         ClassHacker.setPrivateValue(wgPlugin.getDescription(), "version", wgPlugin.getDescription().getVersion() + " with custom flags plugin.");
     }
@@ -226,25 +234,16 @@ public class WGCustomFlagsPlugin extends JavaPlugin {
             handler.saveFlagsForWorld(world);
         }
     }
+    
+    
 
     /**
      * adds a custom flag and hooks it into WorldGuard
      * @param flag the flag to add
      */
-    public void addCustomFlag(Flag flag) {
-        if (customFlags.containsKey(flag.getName())) {
-            if (!customFlags.get(flag.getName()).getClass().equals(flag.getClass())) {
-                getServer().getLogger().log(Level.WARNING, "Duplicate flag: {0}", flag.getName());
-            }
-        } else {
-            customFlags.put(flag.getName(), flag);
-
-            addWGFlag(flag);
-
-            getLogger().log(Level.INFO, "Added custom flag \"{0}\" to WorldGuard.", flag.getName());
-
-            loadAllWorlds();
-        }
+    public void addCustomFlag(Flag flag)
+    {
+        FlagManager.addCustomFlag(flag);
     }
     
     /**
@@ -253,52 +252,7 @@ public class WGCustomFlagsPlugin extends JavaPlugin {
      */
     public void addCustomFlags(Class clazz) throws Exception
     {
-        for (Field f : clazz.getDeclaredFields())
-        {
-            try
-            {
-                if (Flag.class.isAssignableFrom(f.getType()) && (f.getModifiers() & (Modifier.STATIC | Modifier.PUBLIC)) > 0)
-                {
-                    f.setAccessible(true);
-                    Flag flag = (Flag) f.get(null);
-                    if (flag != null)
-                    {
-                        addCustomFlag(flag);
-                    }
-                }
-            }
-            catch(Exception ex)
-            {
-                throw new Exception("Could not add custom flag " + f.getName() + " of class " + clazz.getName(), ex);
-            }
-        }
-    }
-
-    private void addWGFlag(Flag<?> flag) {
-        try {
-            Field flagField = DefaultFlag.class.getField("flagsList");
-
-            Flag<?>[] flags = new Flag<?>[DefaultFlag.flagsList.length + 1];
-            System.arraycopy(DefaultFlag.flagsList, 0, flags, 0, DefaultFlag.flagsList.length);
-
-            flags[DefaultFlag.flagsList.length] = flag;
-
-            if(flag == null) {
-                throw new RuntimeException("flag is null");
-            }
-
-            ClassHacker.setStaticValue(flagField, flags);
-        }
-        catch(Exception ex) {
-            getServer().getLogger().log(Level.WARNING, "Could not add flag {0} to WorldGuard", flag.getName());
-        }
-
-        for(int i = 0; i < DefaultFlag.getFlags().length; i++) {
-            Flag<?> flag1 = DefaultFlag.getFlags()[i];
-            if (flag1 == null) {
-                throw new RuntimeException("Flag["+i+"] is null");
-            }
-        }
+        FlagManager.addCustomFlags(clazz);
     }
     
     /**
