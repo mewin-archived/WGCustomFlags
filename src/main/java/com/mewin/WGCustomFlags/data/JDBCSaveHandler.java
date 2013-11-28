@@ -183,7 +183,8 @@ public class JDBCSaveHandler implements FlagSaveHandler {
                 }
             }
         }
-        plugin.getLogger().log(Level.INFO, "{0} flags saved for {1} regions", new Object[]{flagCounter, regionCounter});
+        // todo : add config about save msg on console "true" or "false"
+        //plugin.getLogger().log(Level.INFO, "{0} flags saved for {1} regions", new Object[]{flagCounter, regionCounter});
     }
 
     private String getFlagValue(Flag flag, Object value) {
