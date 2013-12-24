@@ -4,7 +4,7 @@
 
     <groupId>com.mewin</groupId>
     <artifactId>WGCustomFlags</artifactId>
-    <version>1.5.3</version>
+    <version>1.6</version>
     <packaging>jar</packaging>
     <name>WGCustomFlags</name>
 	<properties>
@@ -60,7 +60,7 @@
         <dependency>
             <groupId>org.bukkit</groupId>
             <artifactId>bukkit</artifactId>
-            <version>1.6.2-R0.1-SNAPSHOT</version>
+            <version>1.7.2-R0.2</version>
             <type>jar</type>
         </dependency>
         <!-- WorldGuard Dependency -->
@@ -70,6 +70,40 @@
             <version>5.8-SNAPSHOT</version>
             <type>jar</type>
             <scope>compile</scope>
+            <exclusions>
+                <exclusion>
+                    <artifactId>truezip</artifactId>
+                    <groupId>de.schlichtherle</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>prtree</artifactId>
+                    <groupId>org.khelekore</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>opencsv</artifactId>
+                    <groupId>net.sf.opencsv</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>junit</artifactId>
+                    <groupId>junit</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>js</artifactId>
+                    <groupId>rhino</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>jchronic</artifactId>
+                    <groupId>com.sk89q</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>iconomy</artifactId>
+                    <groupId>com.nijikokun</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>commandbook</artifactId>
+                    <groupId>com.sk89q</groupId>
+                </exclusion>
+            </exclusions>
         </dependency>
     </dependencies>
 </project>
