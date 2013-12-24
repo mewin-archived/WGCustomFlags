@@ -19,22 +19,29 @@ package com.mewin.WGCustomFlags;
 import com.mewin.WGCustomFlags.data.FlagSaveHandler;
 import com.mewin.WGCustomFlags.data.JDBCSaveHandler;
 import com.mewin.WGCustomFlags.data.YAMLSaveHandler;
+import com.mewin.WGCustomFlags.flags.CustomSetFlag;
 import com.mewin.WGCustomFlags.util.ClassHacker;
 import com.sk89q.util.yaml.YAMLFormat;
 import com.sk89q.util.yaml.YAMLProcessor;
 import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
 import com.sk89q.worldguard.protection.flags.DefaultFlag;
+import com.sk89q.worldguard.protection.flags.EnumFlag;
 import com.sk89q.worldguard.protection.flags.Flag;
+import com.sk89q.worldguard.protection.flags.SetFlag;
+import com.sk89q.worldguard.protection.flags.StateFlag;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
-import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
+import java.util.Set;
 import java.util.logging.Level;
+import org.bukkit.ChatColor;
 import org.bukkit.World;
+import org.bukkit.command.Command;
+import org.bukkit.command.CommandSender;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -59,25 +66,37 @@ public class WGCustomFlagsPlugin extends JavaPlugin {
                                                + "# unload - saves the flags when a world is unloaded (highly recommended as the flags are not saved for world if it is unloaded before the server shuts down)\r\n"
                                                + "# save - saves the flags everytime a world is saved (can cause lags if you have a plugin like MultiVerse the auto-saves the worlds very often)\r\n"
                                                + "# change - saves the flags everytime any flag has changed in the world\r\n"
-                                               + "flag-saving: unload,save";
+                                               + "flag-saving: unload,save\r\n"
+                                               + "# name: flag-logging\r\n"
+                                               + "# default: true\r\n"
+                                               + "# values: true, false\r\n"
+                                               + "# set to false if you want to disable the logging of flag loading/saving and adding\r\n"
+                                               + "flag-logging: true\r\n";
+                                               /*+ "# name: tab-completions\r\n"
+                                               + "# default: false\r\n"
+                                               + "# description: enable/disable experimental tab completions for the region command of WorldGuard\r\n"
+                                               + "# values: true,false\r\n"
+                                               + "tab-completions: false";*/
     
     private JDBCSaveHandler jdbcConnector = null;
     private WGCustomFlagsListener listener;
+    private PluginListener plListener;
 
-    public static HashMap<String, Flag> customFlags;
     public static WorldGuardPlugin wgPlugin;
 
     private File configFile;
     private YAMLProcessor config;
+    private boolean flagLogging = true;
 
     /**
      * Constructor for WGCustomFlagsPlugin
      * should not be called manually
      */
-    public WGCustomFlagsPlugin() {
+    public WGCustomFlagsPlugin()
+    {
         super();
-        customFlags = new HashMap<String, Flag>();
         listener = new WGCustomFlagsListener(this);
+        plListener = new PluginListener(this);
     }
 
     /**
@@ -138,6 +157,7 @@ public class WGCustomFlagsPlugin extends JavaPlugin {
 
     @Override
     public void onEnable() {
+        FlagManager.setWGCFInstance(this);
         configFile = new File(getDataFolder(), "config.yml");
 
         setupWgPlugin();
@@ -148,10 +168,23 @@ public class WGCustomFlagsPlugin extends JavaPlugin {
         }
 
         getServer().getPluginManager().registerEvents(listener, this);
+        getServer().getPluginManager().registerEvents(plListener, this);
 
         loadConfig();
+        
+        if (config.getBoolean("tab-completions", false))
+        {
+            getServer().getPluginManager().registerEvents(new TabCompleteListener(wgPlugin), this);
+        }
+        
+        flagLogging = config.getBoolean("flag-logging", true);
 
         ClassHacker.setPrivateValue(wgPlugin.getDescription(), "version", wgPlugin.getDescription().getVersion() + " with custom flags plugin.");
+    }
+    
+    public boolean isFlagLogging()
+    {
+        return this.flagLogging;
     }
 
     @Override
@@ -167,7 +200,8 @@ public class WGCustomFlagsPlugin extends JavaPlugin {
      * loads the flag values for all worlds
      * should not be called manually
      */
-    public void loadAllWorlds() {
+    public void loadAllWorlds()
+    {
         Iterator<World> itr = getServer().getWorlds().iterator();
 
         while(itr.hasNext()) {
@@ -180,7 +214,8 @@ public class WGCustomFlagsPlugin extends JavaPlugin {
      * should not be called manually
      * @param world the world to load the flags for
      */
-    public void loadFlagsForWorld(World world) {
+    public void loadFlagsForWorld(World world)
+    {
         //getLogger().log(Level.INFO, "Loading flags for world {0}", world.getName());
         FlagSaveHandler handler = getSaveHandler();
 
@@ -226,25 +261,16 @@ public class WGCustomFlagsPlugin extends JavaPlugin {
             handler.saveFlagsForWorld(world);
         }
     }
+    
+    
 
     /**
      * adds a custom flag and hooks it into WorldGuard
      * @param flag the flag to add
      */
-    public void addCustomFlag(Flag flag) {
-        if (customFlags.containsKey(flag.getName())) {
-            if (!customFlags.get(flag.getName()).getClass().equals(flag.getClass())) {
-                getServer().getLogger().log(Level.WARNING, "Duplicate flag: {0}", flag.getName());
-            }
-        } else {
-            customFlags.put(flag.getName(), flag);
-
-            addWGFlag(flag);
-
-            getLogger().log(Level.INFO, "Added custom flag \"{0}\" to WorldGuard.", flag.getName());
-
-            loadAllWorlds();
-        }
+    public void addCustomFlag(Flag flag)
+    {
+        FlagManager.addCustomFlag(flag);
     }
     
     /**
@@ -253,52 +279,7 @@ public class WGCustomFlagsPlugin extends JavaPlugin {
      */
     public void addCustomFlags(Class clazz) throws Exception
     {
-        for (Field f : clazz.getDeclaredFields())
-        {
-            try
-            {
-                if (Flag.class.isAssignableFrom(f.getType()) && (f.getModifiers() & (Modifier.STATIC | Modifier.PUBLIC)) > 0)
-                {
-                    f.setAccessible(true);
-                    Flag flag = (Flag) f.get(null);
-                    if (flag != null)
-                    {
-                        addCustomFlag(flag);
-                    }
-                }
-            }
-            catch(Exception ex)
-            {
-                throw new Exception("Could not add custom flag " + f.getName() + " of class " + clazz.getName(), ex);
-            }
-        }
-    }
-
-    private void addWGFlag(Flag<?> flag) {
-        try {
-            Field flagField = DefaultFlag.class.getField("flagsList");
-
-            Flag<?>[] flags = new Flag<?>[DefaultFlag.flagsList.length + 1];
-            System.arraycopy(DefaultFlag.flagsList, 0, flags, 0, DefaultFlag.flagsList.length);
-
-            flags[DefaultFlag.flagsList.length] = flag;
-
-            if(flag == null) {
-                throw new RuntimeException("flag is null");
-            }
-
-            ClassHacker.setStaticValue(flagField, flags);
-        }
-        catch(Exception ex) {
-            getServer().getLogger().log(Level.WARNING, "Could not add flag {0} to WorldGuard", flag.getName());
-        }
-
-        for(int i = 0; i < DefaultFlag.getFlags().length; i++) {
-            Flag<?> flag1 = DefaultFlag.getFlags()[i];
-            if (flag1 == null) {
-                throw new RuntimeException("Flag["+i+"] is null");
-            }
-        }
+        FlagManager.addCustomFlags(clazz);
     }
     
     /**
@@ -310,11 +291,138 @@ public class WGCustomFlagsPlugin extends JavaPlugin {
         return this.config;
     }
 
-    private FlagSaveHandler getSaveHandler() {
-        if (config.getString("save-handler", "auto").equalsIgnoreCase("auto") && wgPlugin.getGlobalStateManager().useSqlDatabase) {
+    private FlagSaveHandler getSaveHandler()
+    {
+        if (config.getString("save-handler", "auto").equalsIgnoreCase("auto") && wgPlugin.getGlobalStateManager().useSqlDatabase)
+        {
             return jdbcConnector;
-        } else {
+        }
+        else
+        {
             return new YAMLSaveHandler(this, wgPlugin);
         }
+    }
+
+    @Override
+    public boolean onCommand(CommandSender sender, Command command, String label, String[] args)
+    {
+        if (command.getLabel().equalsIgnoreCase("flags"))
+        {
+            if (args.length < 1)
+            {
+                sendFlagList(sender, false);
+                return true;
+            }
+            else
+            {
+                if (args[0].equalsIgnoreCase("-d"))
+                {
+                    sendFlagList(sender, true);
+                    return true;
+                }
+                else if (args[0].equalsIgnoreCase("-i") && args.length > 1)
+                {
+                    Flag<?> flag = FlagManager.getCustomFlag(args[1]);
+                    if (flag == null)
+                    {
+                        for (Flag<?> flag2 : DefaultFlag.getFlags())
+                        {
+                            if (flag2.getName().equalsIgnoreCase(args[1]))
+                            {
+                                flag = flag2;
+                                break;
+                            }
+                        }
+                        if (flag == null)
+                        {
+                            sender.sendMessage(ChatColor.RED + "There is no flag with this name.");
+                            return true;
+                        }
+                    }
+                    sender.sendMessage(ChatColor.YELLOW + "Flag \"" + flag.getName() + "\":");
+                    sender.sendMessage(ChatColor.GRAY + (FlagManager.customFlags.containsKey(flag.getName())? "Custom" : "Default") + " flag");
+                    sender.sendMessage(ChatColor.BLUE + "Type: " + flag.getClass().getSimpleName());
+                    if (flag instanceof StateFlag)
+                    {
+                        sender.sendMessage(ChatColor.BLUE + "Default: " + (((StateFlag) flag).getDefault() ? "ALLOW" : "DENY"));
+                    }
+                    else if (flag instanceof EnumFlag)
+                    {
+                        Class enumClass = (Class) ClassHacker.getPrivateValue(flag, "enumClass");
+                        if (enumClass != null)
+                        {
+                            Object[] enumValues = enumClass.getEnumConstants();
+                            String values = enumValues[0].toString();
+                            for (int i = 1; i < enumValues.length; i++)
+                            {
+                                values += "," + enumValues[i];
+                            }
+                            sender.sendMessage(ChatColor.BLUE + "Values: " + values);
+                        }
+                    }
+                    else if (flag instanceof SetFlag
+                            || flag instanceof CustomSetFlag)
+                    {
+                        Flag<?> subFlag = (Flag<?>) ClassHacker.getPrivateValue(flag, "subFlag");
+                        sender.sendMessage(ChatColor.BLUE + "Sub Flag Type: " + subFlag.getClass().getSimpleName());
+                        if (subFlag instanceof SetFlag
+                                || subFlag instanceof CustomSetFlag)
+                        {
+                            Class enumClass = (Class) ClassHacker.getPrivateValue(subFlag, "enumClass");
+                            if (enumClass != null)
+                            {
+                                Object[] enumValues = enumClass.getEnumConstants();
+                                String values = enumValues[0].toString();
+                                for (int i = 1; i < enumValues.length; i++)
+                                {
+                                    values += "," + enumValues[i];
+                                }
+                                sender.sendMessage(ChatColor.BLUE + "Values: " + values);
+                            }
+                        }
+                    }
+                    String desc = FlagManager.getFlagDescription(flag.getName());
+                    if (desc != null)
+                    {
+                        sender.sendMessage(ChatColor.BLUE + "Description: " + desc);
+                    }
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+        }
+        else
+        {
+            return false;
+        }
+    }
+    
+    private void sendFlagList(CommandSender sender, boolean defaults)
+    {
+        ArrayList<String> flags = new ArrayList<String>();
+        Set<String> keys = FlagManager.customFlags.keySet();
+        if (!defaults)
+        {
+            flags.addAll(keys);
+        }
+        else
+        {
+            for (Flag<?> flag : DefaultFlag.getFlags())
+            {
+                flags.add(flag.getName());
+            }
+        }
+        
+        String[] names = flags.toArray(new String[0]);
+        Arrays.sort(names);
+        String text = (keys.contains(names[0]) ? ChatColor.AQUA : "") + names[0];
+        for(int i = 1; i < names.length; i++)
+        {
+            text += ChatColor.GRAY + "," + (keys.contains(names[i]) ? ChatColor.AQUA : "") + names[i];
+        }
+        sender.sendMessage(text);
     }
 }

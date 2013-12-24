@@ -16,6 +16,7 @@
  */
 package com.mewin.WGCustomFlags.data;
 
+import com.mewin.WGCustomFlags.FlagManager;
 import com.mewin.WGCustomFlags.WGCustomFlagsPlugin;
 import com.mewin.WGCustomFlags.flags.CustomFlag;
 import com.mewin.WGCustomFlags.util.ClassHacker;
@@ -146,7 +147,7 @@ public class JDBCSaveHandler implements FlagSaveHandler {
                 Flag<?> flag = entry2.getKey();
                 Object value = entry2.getValue();
 
-                if (WGCustomFlagsPlugin.customFlags.containsKey(flag.getName())) {
+                if (FlagManager.customFlags.containsKey(flag.getName())) {
                     try {
                         String nextSql = "INSERT INTO worldflags(world, region, flagName, flagValue)" +
                                       "VALUES('" + world.getName() + "', '" + region.getId() + "', '" + flag.getName() + "', '";
@@ -183,7 +184,10 @@ public class JDBCSaveHandler implements FlagSaveHandler {
                 }
             }
         }
-        plugin.getLogger().log(Level.INFO, "{0} flags saved for {1} regions", new Object[]{flagCounter, regionCounter});
+        if (plugin.isFlagLogging())
+        {
+            plugin.getLogger().log(Level.INFO, "{0} flags saved for {1} regions", new Object[]{flagCounter, regionCounter});
+        }
     }
 
     private String getFlagValue(Flag flag, Object value) {
@@ -254,7 +258,7 @@ public class JDBCSaveHandler implements FlagSaveHandler {
             ResultSet rs = st.executeQuery();
 
             while(rs.next()) {
-                Flag flag = WGCustomFlagsPlugin.customFlags.get(rs.getString("flagName"));
+                Flag flag = FlagManager.customFlags.get(rs.getString("flagName"));
                 ProtectedRegion region = regionManager.getRegion(rs.getString("region"));
 
                 if (flag == null || region == null) {

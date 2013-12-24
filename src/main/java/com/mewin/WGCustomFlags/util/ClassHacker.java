@@ -50,8 +50,14 @@ public final class ClassHacker {
     }
 
     public static Object getPrivateValue(Object obj, String name) {
+        Field field = null;
+        Class clazz = obj.getClass();
         try {
-            Field field = obj.getClass().getDeclaredField(name);
+            do
+            {
+                field = clazz.getDeclaredField(name);
+                clazz = clazz.getSuperclass();
+            } while (field == null && clazz != null);
             field.setAccessible(true);
             return field.get(obj);
         } catch(Exception ex) {
