@@ -7,3 +7,12 @@ authors: [ mewin ]
 depend: [ WorldGuard ]
 softdepend: [ WorldEdit ]
 website: http://dev.bukkit.org/server-mods/worldguard-custom-flags/
+
+commands:
+  flags:
+    description: allows you to display information about WorldGuard flags
+    usage: /<command> [-d|i <flag>]
+    permission: wgcustomflags.flags
+permissions:
+  wgcustomflags.flags:
+    default: op
