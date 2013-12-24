@@ -71,7 +71,10 @@ public class FlagManager
 
             FlagManager.addWGFlag(flag);
 
-            Bukkit.getLogger().log(Level.INFO, "Added custom flag \"{0}\" to WorldGuard.", flag.getName());
+            if (custInst.isFlagLogging())
+            {
+                Bukkit.getLogger().log(Level.INFO, "Added custom flag \"{0}\" to WorldGuard.", flag.getName());
+            }
 
             custInst.loadAllWorlds();
         }
@@ -79,7 +82,12 @@ public class FlagManager
     
     public static void addFlagDescription(String flag, String description)
     {
-        flagDescriptions.put(flag, description);
+        flagDescriptions.put(flag.toLowerCase(), description);
+    }
+    
+    public static String getFlagDescription(String flag)
+    {
+        return flagDescriptions.get(flag.toLowerCase());
     }
 
     private static void addWGFlag(Flag<?> flag)

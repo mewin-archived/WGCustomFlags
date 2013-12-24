@@ -46,6 +46,13 @@ import org.yaml.snakeyaml.Yaml;
  */
 public class PluginListener implements Listener
 {
+    private WGCustomFlagsPlugin custPlugin;
+    
+    public PluginListener(WGCustomFlagsPlugin plug)
+    {
+        this.custPlugin = plug;
+    }
+    
     @EventHandler
     public void onPluginEnable(PluginEnableEvent e)
     {
@@ -54,6 +61,10 @@ public class PluginListener implements Listener
         InputStream in = plugin.getClass().getResourceAsStream("/flags.yml");
         if (in != null)
         {
+            if (custPlugin.isFlagLogging())
+            {
+                custPlugin.getLogger().log(Level.INFO, "flags.yml found in {0}", plugin.getName());
+            }
             Object obj = yaml.load(in);
             if (obj instanceof Map)
             {
@@ -67,15 +78,12 @@ public class PluginListener implements Listener
                         if (map.containsKey("field")
                                 && map.get("field") instanceof String)
                         {
-                            String[] split = ((String) map.get("field")).split(".");
-                            String clazz = split[0];
-                            for (int i = 1; i < split.length - 1; i++)
-                            {
-                                clazz += "." + split[i];
-                            }
+                            String field = (String) map.get("field");
+                            int dot = field.lastIndexOf(".");
+                            String clazz = field.substring(0, dot);
                             try
                             {
-                                Field f = Class.forName(clazz).getDeclaredField(split[split.length - 1]);
+                                Field f = Class.forName(clazz).getDeclaredField(field.substring(dot + 1));
                                 FlagManager.addCustomFlag(((Flag) f.get(null)));
                                 if (map.containsKey("description"))
                                 {
