@@ -41,11 +41,10 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.SQLWarning;
 import java.sql.Statement;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.Map.Entry;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -115,6 +114,7 @@ public class JDBCSaveHandler implements FlagSaveHandler {
 
     @Override
     public void saveFlagsForWorld(World world){
+        /*
         RegionManager regionManager = WGCustomFlagsPlugin.wgPlugin.getRegionManager(world);
         if (regionManager == null) {
             plugin.getLogger().info("Regions not activated, no flags saved.");
@@ -188,6 +188,7 @@ public class JDBCSaveHandler implements FlagSaveHandler {
         {
             plugin.getLogger().log(Level.INFO, "{0} flags saved for {1} regions", new Object[]{flagCounter, regionCounter});
         }
+        */
     }
 
     private String getFlagValue(Flag flag, Object value) {
@@ -253,26 +254,46 @@ public class JDBCSaveHandler implements FlagSaveHandler {
         }
         attemptReconnect();
         try {
-            CallableStatement st = connection.prepareCall("SELECT * FROM worldflags WHERE world = '" + world.getName() + "'");
+            String flags = join(FlagManager.customFlags.keySet(), ",", "'");
 
+            Logger.getLogger(JDBCSaveHandler.class.getName()).finest("Loading custom flags " + flags + " from database...");
+
+            CallableStatement st = connection.prepareCall("SELECT rf.* FROM region_flag rf, world w WHERE rf.world_id = w.id AND w.name = ? AND rf.flag IN (" + flags + ")");
+            st.setString(1, world.getName());
             ResultSet rs = st.executeQuery();
 
             while(rs.next()) {
-                Flag flag = FlagManager.customFlags.get(rs.getString("flagName"));
-                ProtectedRegion region = regionManager.getRegion(rs.getString("region"));
+                Flag flag = FlagManager.customFlags.get(rs.getString("flag"));
+                ProtectedRegion region = regionManager.getRegion(rs.getString("region_id"));
 
                 if (flag == null || region == null) {
                     //System.out.println("Error loading flags from db");
                     continue;
                 }
 
-                String value = rs.getString("flagValue");
+                String value = rs.getString("value").trim();
 
                 setRegionFlag(region, flag, value);
             }
         } catch (Exception ex) {
             Logger.getLogger(JDBCSaveHandler.class.getName()).log(Level.SEVERE, null, ex);
         }
+
+    }
+
+    static String join(Collection<?> s, String delimiter, String wrapper) {
+        StringBuilder builder = new StringBuilder();
+        Iterator<?> iter = s.iterator();
+        while (iter.hasNext()) {
+            builder.append(wrapper);
+            builder.append(iter.next());
+            builder.append(wrapper);
+            if (!iter.hasNext()) {
+                break;
+            }
+            builder.append(delimiter);
+        }
+        return builder.toString();
     }
 
     private void setRegionFlag(ProtectedRegion region, Flag flag, String value) {
@@ -325,7 +346,7 @@ public class JDBCSaveHandler implements FlagSaveHandler {
 
             return splits;
         } else if (flag instanceof StateFlag) {
-            region.setFlag(flag, StateFlag.State.valueOf(value));
+            region.setFlag(flag, StateFlag.State.valueOf(value.toUpperCase()));
         } else if (flag instanceof VectorFlag) {
             String[] split = value.split("\\|");
 

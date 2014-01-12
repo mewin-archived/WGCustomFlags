@@ -76,7 +76,7 @@ public class FlagManager
                 Bukkit.getLogger().log(Level.INFO, "Added custom flag \"{0}\" to WorldGuard.", flag.getName());
             }
 
-            custInst.loadAllWorlds();
+            //custInst.loadAllWorlds();
         }
     }
     
