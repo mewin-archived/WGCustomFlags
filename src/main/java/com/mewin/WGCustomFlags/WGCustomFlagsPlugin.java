@@ -38,6 +38,8 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.logging.Level;
+
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.World;
 import org.bukkit.command.Command;
@@ -180,6 +182,13 @@ public class WGCustomFlagsPlugin extends JavaPlugin {
         flagLogging = config.getBoolean("flag-logging", true);
 
         ClassHacker.setPrivateValue(wgPlugin.getDescription(), "version", wgPlugin.getDescription().getVersion() + " with custom flags plugin.");
+
+        Bukkit.getScheduler().runTaskLaterAsynchronously(this, new Runnable() {
+            @Override
+            public void run() {
+                loadAllWorlds();
+            }
+        }, 20 * 5L); //give custom flags time to register
     }
     
     public boolean isFlagLogging()
