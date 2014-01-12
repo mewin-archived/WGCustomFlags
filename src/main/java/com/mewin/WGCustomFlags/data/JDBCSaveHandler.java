@@ -256,6 +256,8 @@ public class JDBCSaveHandler implements FlagSaveHandler {
         try {
             String flags = join(FlagManager.customFlags.keySet(), ",", "'");
 
+            Logger.getLogger(JDBCSaveHandler.class.getName()).finest("Loading custom flags " + flags + " from database...");
+
             CallableStatement st = connection.prepareCall("SELECT rf.* FROM region_flag rf, world w WHERE rf.world_id = w.id AND w.name = ? AND rf.flag IN (" + flags + ")");
             st.setString(1, world.getName());
             ResultSet rs = st.executeQuery();

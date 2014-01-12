@@ -183,9 +183,11 @@ public class WGCustomFlagsPlugin extends JavaPlugin {
 
         ClassHacker.setPrivateValue(wgPlugin.getDescription(), "version", wgPlugin.getDescription().getVersion() + " with custom flags plugin.");
 
+        getLogger().info("Waiting 5 seconds for custom flags to register...");
         Bukkit.getScheduler().runTaskLaterAsynchronously(this, new Runnable() {
             @Override
             public void run() {
+                getLogger().info("Loading custom flags for all worlds...");
                 loadAllWorlds();
             }
         }, 20 * 5L); //give custom flags time to register
