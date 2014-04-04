@@ -60,7 +60,7 @@ public class FlagManager
      * adds a custom flag and hooks it into WorldGuard
      * @param flag the flag to add
      */
-    public static void addCustomFlag(Flag flag)
+    public synchronized static void addCustomFlag(Flag flag)
     {
         if (customFlags.containsKey(flag.getName())) {
             if (!customFlags.get(flag.getName()).getClass().equals(flag.getClass())) {
