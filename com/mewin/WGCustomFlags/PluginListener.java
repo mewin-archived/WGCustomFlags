@@ -113,7 +113,7 @@ public class PluginListener implements Listener
                         }
                         else
                         {
-                            System.out.println(map.toString());
+                            //System.out.println(map.toString());
                         }
                     }
                 }
