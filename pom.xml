@@ -7,7 +7,7 @@
     <version>1.7.1</version>
     <packaging>jar</packaging>
     <name>WGCustomFlags</name>
-	<properties>
+    <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.build.number>DEV</project.build.number>
     </properties>
@@ -106,4 +106,16 @@
             </exclusions>
         </dependency>
     </dependencies>
+ <pluginRepositories>
+    <pluginRepository>
+          <id>upstream</id>
+          <url>${env.Jenkins.Repository}</url>
+          <releases>
+            <enabled>true</enabled>
+          </releases>
+          <snapshots>
+            <enabled>true</enabled>
+         </snapshots>
+    </pluginRepository>
+  </pluginRepositories>
 </project>
