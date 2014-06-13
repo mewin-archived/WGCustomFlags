@@ -110,7 +110,7 @@
         <repository>
             <id>local.repo</id>
             <name>Mewin Repository</name>
-            <url>/var/www/maven</url>
+            <url>file:///var/www/maven</url>
         </repository>
     </distributionManagement>
 </project>
