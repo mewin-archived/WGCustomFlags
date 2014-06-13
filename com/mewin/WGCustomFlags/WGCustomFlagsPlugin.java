@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 mewin <mewin001@hotmail.de>
+ * Copyright (C) 2012-2014 mewin <mewin001@hotmail.de>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -102,7 +102,8 @@ public class WGCustomFlagsPlugin extends JavaPlugin {
     /**
      * sets up the plugin and creates connection to the WorldGuard plugin
      */
-    private void setupWgPlugin() {
+    private void setupWgPlugin()
+    {
         Plugin plug = getServer().getPluginManager().getPlugin("WorldGuard");
         if(plug == null || !(plug instanceof WorldGuardPlugin)) {
             getLogger().warning("WorldGuard plugin not found, disabling.");
@@ -113,13 +114,18 @@ public class WGCustomFlagsPlugin extends JavaPlugin {
         }
     }
 
-    private void loadConfig() {
+    private void loadConfig()
+    {
         getLogger().info("Loading configuration...");
-        if (!configFile.exists()) {
-            try {
+        if (!configFile.exists())
+        {
+            try
+            {
                 getLogger().info("No configuration found, writing defaults.");
                 writeDefaultConfig();
-            } catch(IOException ex) {
+            }
+            catch(IOException ex)
+            {
                 getLogger().log(Level.SEVERE, "Could not create default configuration.", ex);
 
                 return;
@@ -128,10 +134,12 @@ public class WGCustomFlagsPlugin extends JavaPlugin {
 
         config = new YAMLProcessor(configFile, true, YAMLFormat.EXTENDED);
 
-        try {
+        try
+        {
             config.load();
         }
-        catch(IOException ex) {
+        catch(IOException ex)
+        {
             getLogger().log(Level.SEVERE, "Could read configuration.", ex);
             return;
         }
@@ -139,12 +147,15 @@ public class WGCustomFlagsPlugin extends JavaPlugin {
         getLogger().info("Configuration loaded.");
     }
 
-    private void writeDefaultConfig() throws IOException {
-        if (!this.getDataFolder().exists()) {
+    private void writeDefaultConfig() throws IOException
+    {
+        if (!this.getDataFolder().exists())
+        {
             this.getDataFolder().mkdirs();
         }
 
-        if (!this.configFile.exists()) {
+        if (!this.configFile.exists())
+        {
             this.configFile.createNewFile();
         }
 
@@ -161,7 +172,8 @@ public class WGCustomFlagsPlugin extends JavaPlugin {
         configFile = new File(getDataFolder(), "config.yml");
 
         setupWgPlugin();
-        if (wgPlugin.getGlobalStateManager().useSqlDatabase) {
+        if (wgPlugin.getGlobalStateManager().useSqlDatabase)
+        {
             jdbcConnector = new JDBCSaveHandler(wgPlugin.getGlobalStateManager().sqlDsn,
                     wgPlugin.getGlobalStateManager().sqlUsername,
                     wgPlugin.getGlobalStateManager().sqlPassword, this);
@@ -225,12 +237,14 @@ public class WGCustomFlagsPlugin extends JavaPlugin {
     /**
      * saves all custom flags to YAML file or database
      * should not be called manually
+     * @param asynchron if set to true the flags will be saved asynchronously
      */
     public void saveAllWorlds(boolean asynchron)
     {
         Iterator<World> itr = getServer().getWorlds().iterator();
 
-        while(itr.hasNext()) {
+        while(itr.hasNext())
+        {
             saveFlagsForWorld(itr.next(), asynchron);
         }
     }
@@ -239,6 +253,7 @@ public class WGCustomFlagsPlugin extends JavaPlugin {
      * saves the flag values for a single world
      * should not be called manually
      * @param world the world to save the flags for
+     * @param asynchron if set to true the flags will be saved asynchronously
      */
     public void saveFlagsForWorld(final World world, boolean asynchron)
     {
@@ -276,6 +291,7 @@ public class WGCustomFlagsPlugin extends JavaPlugin {
     /**
      * adds flags for all public and static fields of a class that extend Flag
      * @param clazz the class that contains the flags
+     * @throws java.lang.Exception
      */
     public void addCustomFlags(Class clazz) throws Exception
     {
@@ -416,12 +432,20 @@ public class WGCustomFlagsPlugin extends JavaPlugin {
             }
         }
         
-        String[] names = flags.toArray(new String[0]);
-        Arrays.sort(names);
-        String text = (keys.contains(names[0]) ? ChatColor.AQUA : "") + names[0];
-        for(int i = 1; i < names.length; i++)
+        String text;
+        if (flags.size() > 0)
         {
-            text += ChatColor.GRAY + "," + (keys.contains(names[i]) ? ChatColor.AQUA : "") + names[i];
+            String[] names = flags.toArray(new String[0]);
+            Arrays.sort(names);
+            text = (keys.contains(names[0]) ? ChatColor.AQUA : "") + names[0];
+            for(int i = 1; i < names.length; i++)
+            {
+                text += ChatColor.GRAY + "," + (keys.contains(names[i]) ? ChatColor.AQUA : "") + names[i];
+            }
+        }
+        else
+        {
+            text = ChatColor.RED + "There are no flags to display.";
         }
         sender.sendMessage(text);
     }
