@@ -134,6 +134,7 @@ public class FlagManager
     /**
      * adds flags for all public and static fields of a class that extend Flag
      * @param clazz the class that contains the flags
+     * @throws java.lang.Exception if an exception occures while adding the flags
      */
     public static void addCustomFlags(Class clazz) throws Exception
     {
