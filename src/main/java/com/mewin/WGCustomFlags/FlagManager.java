@@ -80,11 +80,6 @@ public class FlagManager
         }
     }
     
-    /**
-     * adds a description for a flag that is displayed when the player uses the /flags command
-     * @param flag the name of the flag to register the description for
-     * @param description the description for the flag
-     */
     public static void addFlagDescription(String flag, String description)
     {
         flagDescriptions.put(flag.toLowerCase(), description);
