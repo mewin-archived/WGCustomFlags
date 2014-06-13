@@ -151,7 +151,17 @@ public class JDBCSaveHandler implements FlagSaveHandler {
                     try {
                         String nextSql = "INSERT INTO worldflags(world, region, flagName, flagValue)" +
                                       "VALUES('" + world.getName() + "', '" + region.getId() + "', '" + flag.getName() + "', '";
-                        String next = getFlagValue(flag, value);
+                        String next;
+                        try
+                        {
+                            next = getFlagValue(flag, value);
+                        }
+                        catch(Exception ex)
+                        {
+                            plugin.getLogger().log(Level.WARNING, "Exception while trying to save flag {0} of region {1}.", new Object[]{flag.getName(), region.getId()});
+                            plugin.getLogger().log(Level.WARNING, "", ex);
+                            continue;
+                        }
 
                         if(next == null) {
                             plugin.getLogger().log(Level.WARNING, "Value for flag {0} off region {1} is null.", new Object[]{flag.getName(), region.getId()});

@@ -206,7 +206,16 @@ public class YAMLSaveHandler implements FlagSaveHandler {
 
                 Flag<?> flag = regionFlag.getKey();
 
-                Object value = valueForFlag(flag, region);
+                Object value = null;
+                try
+                {
+                    value = valueForFlag(flag, region);
+                }
+                catch(Exception ex)
+                {
+                    plugin.getLogger().log(Level.WARNING, "Exception while trying to save flag {0} of region {1}.", new Object[]{flag.getName(), region.getId()});
+                    plugin.getLogger().log(Level.WARNING, "", ex);
+                }
 
                 if (FlagManager.customFlags.containsKey(flag.getName()) && value != null)
                 {

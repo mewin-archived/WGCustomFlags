@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013 mewin<mewin001@hotmail.de>
+ * Copyright (C) 2014 mewin<mewin001@hotmail.de>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -60,7 +60,7 @@ public class FlagManager
      * adds a custom flag and hooks it into WorldGuard
      * @param flag the flag to add
      */
-    public static void addCustomFlag(Flag flag)
+    public synchronized static void addCustomFlag(Flag flag)
     {
         if (customFlags.containsKey(flag.getName())) {
             if (!customFlags.get(flag.getName()).getClass().equals(flag.getClass())) {
@@ -90,7 +90,7 @@ public class FlagManager
         return flagDescriptions.get(flag.toLowerCase());
     }
 
-    private static void addWGFlag(Flag<?> flag)
+    private synchronized static void addWGFlag(Flag<?> flag)
     {
         try {
             Field flagField = DefaultFlag.class.getField("flagsList");
