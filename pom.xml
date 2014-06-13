@@ -4,7 +4,7 @@
 
     <groupId>com.mewin</groupId>
     <artifactId>WGCustomFlags</artifactId>
-    <version>1.6.1</version>
+    <version>1.7.1</version>
     <packaging>jar</packaging>
     <name>WGCustomFlags</name>
 	<properties>
@@ -60,7 +60,7 @@
         <dependency>
             <groupId>org.bukkit</groupId>
             <artifactId>bukkit</artifactId>
-            <version>1.7.2-R0.2</version>
+            <version>1.7.9-R0.2</version>
             <type>jar</type>
         </dependency>
         <!-- WorldGuard Dependency -->
