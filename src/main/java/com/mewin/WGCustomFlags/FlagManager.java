@@ -91,6 +91,11 @@ public class FlagManager
         flagDescriptions.put(flag.toLowerCase(), description);
     }
     
+    /**
+     * retrieves the description for a flag that has been registered using addFlagDescription
+     * @param flag the name of the flag to retrieve the description
+     * @return the registered description or null if none has been registered
+     */
     public static String getFlagDescription(String flag)
     {
         return flagDescriptions.get(flag.toLowerCase());
