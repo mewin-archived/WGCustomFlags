@@ -103,7 +103,8 @@ public class FlagManager
 
     private synchronized static void addWGFlag(Flag<?> flag)
     {
-        try {
+        try
+        {
             Field flagField = DefaultFlag.class.getField("flagsList");
 
             Flag<?>[] flags = new Flag<?>[DefaultFlag.flagsList.length + 1];
@@ -111,17 +112,20 @@ public class FlagManager
 
             flags[DefaultFlag.flagsList.length] = flag;
 
-            if(flag == null) {
+            if(flag == null)
+            {
                 throw new RuntimeException("flag is null");
             }
 
             ClassHacker.setStaticValue(flagField, flags);
         }
-        catch(Exception ex) {
+        catch(Exception ex)
+        {
             Bukkit.getServer().getLogger().log(Level.WARNING, "Could not add flag {0} to WorldGuard", flag.getName());
         }
 
-        for(int i = 0; i < DefaultFlag.getFlags().length; i++) {
+        for(int i = 0; i < DefaultFlag.getFlags().length; i++)
+        {
             Flag<?> flag1 = DefaultFlag.getFlags()[i];
             if (flag1 == null) {
                 throw new RuntimeException("Flag["+i+"] is null");
