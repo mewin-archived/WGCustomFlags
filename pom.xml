@@ -106,4 +106,16 @@
             </exclusions>
         </dependency>
     </dependencies>
+ <pluginRepositories>
+    <pluginRepository>
+          <id>upstream</id>
+          <url>${env.Jenkins.Repository}</url>
+          <releases>
+            <enabled>true</enabled>
+          </releases>
+          <snapshots>
+            <enabled>true</enabled>
+         </snapshots>
+    </pluginRepository>
+  </pluginRepositories>
 </project>
