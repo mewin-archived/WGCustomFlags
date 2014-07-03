@@ -80,11 +80,22 @@ public class FlagManager
         }
     }
     
+    
+    /**
+     * adds a description for a flag that is displayed when the player uses the /flags command
+     * @param flag the name of the flag to register the description for
+     * @param description the description for the flag
+     */
     public static void addFlagDescription(String flag, String description)
     {
         flagDescriptions.put(flag.toLowerCase(), description);
     }
     
+    /**
+     * retrieves the description for a flag that has been registered using addFlagDescription
+     * @param flag the name of the flag to retrieve the description
+     * @return the registered description or null if none has been registered
+     */
     public static String getFlagDescription(String flag)
     {
         return flagDescriptions.get(flag.toLowerCase());
@@ -92,7 +103,8 @@ public class FlagManager
 
     private synchronized static void addWGFlag(Flag<?> flag)
     {
-        try {
+        try
+        {
             Field flagField = DefaultFlag.class.getField("flagsList");
 
             Flag<?>[] flags = new Flag<?>[DefaultFlag.flagsList.length + 1];
@@ -100,17 +112,20 @@ public class FlagManager
 
             flags[DefaultFlag.flagsList.length] = flag;
 
-            if(flag == null) {
+            if(flag == null)
+            {
                 throw new RuntimeException("flag is null");
             }
 
             ClassHacker.setStaticValue(flagField, flags);
         }
-        catch(Exception ex) {
+        catch(Exception ex)
+        {
             Bukkit.getServer().getLogger().log(Level.WARNING, "Could not add flag {0} to WorldGuard", flag.getName());
         }
 
-        for(int i = 0; i < DefaultFlag.getFlags().length; i++) {
+        for(int i = 0; i < DefaultFlag.getFlags().length; i++)
+        {
             Flag<?> flag1 = DefaultFlag.getFlags()[i];
             if (flag1 == null) {
                 throw new RuntimeException("Flag["+i+"] is null");
@@ -123,6 +138,7 @@ public class FlagManager
     /**
      * adds flags for all public and static fields of a class that extend Flag
      * @param clazz the class that contains the flags
+     * @throws java.lang.Exception if an exception occures while adding the flags
      */
     public static void addCustomFlags(Class clazz) throws Exception
     {
