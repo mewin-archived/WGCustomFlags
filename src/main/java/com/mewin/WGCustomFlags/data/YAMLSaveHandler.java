@@ -30,6 +30,7 @@ import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
 import com.sk89q.worldguard.protection.flags.EnumFlag;
 import com.sk89q.worldguard.protection.flags.Flag;
 import com.sk89q.worldguard.protection.flags.LocationFlag;
+import com.sk89q.worldguard.protection.flags.RegionGroup;
 import com.sk89q.worldguard.protection.flags.SetFlag;
 import com.sk89q.worldguard.protection.flags.StateFlag;
 import com.sk89q.worldguard.protection.flags.VectorFlag;
@@ -96,6 +97,11 @@ public class YAMLSaveHandler implements FlagSaveHandler {
                 }
 
                 ProtectedRegion region = regionManager.getRegion(regionName);
+                
+                if (region == null)
+                {
+                    continue;
+                }
 
                 YAMLNode flags = node.getNode("flags");
 
@@ -103,6 +109,7 @@ public class YAMLSaveHandler implements FlagSaveHandler {
                     plugin.getLogger().warning("flags is null");
                     continue;
                 }
+                YAMLNode groups = node.getNode("groups");
 
                 Iterator<Map.Entry<String, Flag>> itr2 = FlagManager.customFlags.entrySet().iterator();
 
@@ -111,12 +118,30 @@ public class YAMLSaveHandler implements FlagSaveHandler {
                     Flag flag = next.getValue();
                     Object value = castValue(flag, flags.getProperty(next.getKey()));
 
-                    if(value == null) {
+                    if(value == null)
+                    {
                         //System.out.println("Value is null");
                         continue;
                     }
-
+                    
                     region.setFlag(flag, value);
+
+                    if (groups != null
+                            && flag.getRegionGroupFlag() != null)
+                    {
+                        String group = groups.getString(flag.getName());
+                        
+                        if (group != null)
+                        {
+                            try
+                            {
+                                RegionGroup regionGroup = RegionGroup.valueOf(group);
+                                region.setFlag(flag.getRegionGroupFlag(), regionGroup);
+                            }
+                            catch(IllegalArgumentException ex)
+                            {}
+                        }
+                    }
                 }
             }
         }
@@ -200,6 +225,7 @@ public class YAMLSaveHandler implements FlagSaveHandler {
             Iterator<Map.Entry<Flag<?>, Object>> itr2 = flags.entrySet().iterator();
 
             HashMap<String, Object> values = new HashMap<String, Object>();
+            HashMap<String, String> groups = new HashMap<String, String>();
 
             while(itr2.hasNext()) {
                 Map.Entry<Flag<?>, Object> regionFlag = itr2.next();
@@ -220,6 +246,14 @@ public class YAMLSaveHandler implements FlagSaveHandler {
                 if (FlagManager.customFlags.containsKey(flag.getName()) && value != null)
                 {
                     values.put(flag.getName(), value);
+                    if (flag.getRegionGroupFlag() != null)
+                    {
+                        RegionGroup group = region.getFlag(flag.getRegionGroupFlag());
+                        if (group != null)
+                        {
+                            groups.put(flag.getName(), group.name());
+                        }
+                    }
                 }
             }
 
@@ -231,6 +265,10 @@ public class YAMLSaveHandler implements FlagSaveHandler {
 
             flagMap.put("region", regionName);
             flagMap.put("flags", values);
+            if (groups.size() > 0)
+            {
+                flagMap.put("groups", groups);
+            }
 
             regionList.add(flagMap);
         }
