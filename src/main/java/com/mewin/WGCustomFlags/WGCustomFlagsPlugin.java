@@ -33,11 +33,17 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.logging.Level;
+
+import com.sk89q.worldguard.protection.managers.storage.RegionDriver;
+import com.sk89q.worldguard.protection.managers.storage.sql.SQLDriver;
+import com.sk89q.worldguard.util.sql.DataSourceConfig;
 import org.bukkit.ChatColor;
 import org.bukkit.World;
 import org.bukkit.command.Command;
@@ -172,11 +178,16 @@ public class WGCustomFlagsPlugin extends JavaPlugin {
         configFile = new File(getDataFolder(), "config.yml");
 
         setupWgPlugin();
-        if (wgPlugin.getGlobalStateManager().useSqlDatabase)
+        RegionDriver driver = wgPlugin.getGlobalStateManager().selectedRegionStoreDriver;
+        if (driver instanceof SQLDriver)
         {
-            jdbcConnector = new JDBCSaveHandler(wgPlugin.getGlobalStateManager().sqlDsn,
-                    wgPlugin.getGlobalStateManager().sqlUsername,
-                    wgPlugin.getGlobalStateManager().sqlPassword, this);
+            SQLDriver sqlDriver = (SQLDriver) driver;
+            DataSourceConfig dsConfig = getDataSourceConfig(sqlDriver);
+            if (dsConfig != null) {
+                jdbcConnector = new JDBCSaveHandler(dsConfig.getDsn(),
+                        dsConfig.getUsername(),
+                        dsConfig.getPassword(), this);
+            }
         }
 
         getServer().getPluginManager().registerEvents(listener, this);
@@ -193,7 +204,25 @@ public class WGCustomFlagsPlugin extends JavaPlugin {
 
         ClassHacker.setPrivateValue(wgPlugin.getDescription(), "version", wgPlugin.getDescription().getVersion() + " with custom flags plugin.");
     }
-    
+
+    /**
+     * Use some really hacky magic to get hold of the package-protected DataSourceConfig.
+     */
+    private DataSourceConfig getDataSourceConfig(SQLDriver sqlDriver) {
+        try {
+            Method getConfig = sqlDriver.getClass().getDeclaredMethod("getConfig");
+            getConfig.setAccessible(true);
+            Object returnValue = getConfig.invoke(sqlDriver);
+            getConfig.setAccessible(false);
+            if (returnValue instanceof DataSourceConfig) {
+                return (DataSourceConfig) returnValue;
+            }
+        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
+            // Ignore - return null, and continue
+        }
+        return null;
+    }
+
     public boolean isFlagLogging()
     {
         return this.flagLogging;
@@ -309,7 +338,7 @@ public class WGCustomFlagsPlugin extends JavaPlugin {
 
     private FlagSaveHandler getSaveHandler()
     {
-        if (config.getString("save-handler", "auto").equalsIgnoreCase("auto") && wgPlugin.getGlobalStateManager().useSqlDatabase)
+        if (config.getString("save-handler", "auto").equalsIgnoreCase("auto") && jdbcConnector != null)
         {
             return jdbcConnector;
         }
@@ -360,7 +389,7 @@ public class WGCustomFlagsPlugin extends JavaPlugin {
                     sender.sendMessage(ChatColor.BLUE + "Type: " + flag.getClass().getSimpleName());
                     if (flag instanceof StateFlag)
                     {
-                        sender.sendMessage(ChatColor.BLUE + "Default: " + (((StateFlag) flag).getDefault() ? "ALLOW" : "DENY"));
+                        sender.sendMessage(ChatColor.BLUE + "Default: " + ((StateFlag) flag).getDefault());
                     }
                     else if (flag instanceof EnumFlag)
                     {
