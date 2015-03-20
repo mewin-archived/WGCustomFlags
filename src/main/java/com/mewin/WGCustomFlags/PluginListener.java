@@ -168,7 +168,7 @@ public class PluginListener implements Listener
                 && map.containsKey("settype")
                 && map.get("settype") instanceof Map)
         {
-            Flag tmpFlag = getFlag("type_" + name, (Map) map.get("setttype"));
+            Flag tmpFlag = getFlag("type_" + name, (Map) map.get("settype"));
             newFlag = new CustomSetFlag(name, tmpFlag);
         }
         else if (type.equalsIgnoreCase("enum")
