@@ -69,41 +69,7 @@
             <artifactId>worldguard</artifactId>
             <version>6.0.0-SNAPSHOT</version>
             <type>jar</type>
-            <scope>compile</scope>
-            <exclusions>
-                <exclusion>
-                    <artifactId>truezip</artifactId>
-                    <groupId>de.schlichtherle</groupId>
-                </exclusion>
-                <exclusion>
-                    <artifactId>prtree</artifactId>
-                    <groupId>org.khelekore</groupId>
-                </exclusion>
-                <exclusion>
-                    <artifactId>opencsv</artifactId>
-                    <groupId>net.sf.opencsv</groupId>
-                </exclusion>
-                <exclusion>
-                    <artifactId>junit</artifactId>
-                    <groupId>junit</groupId>
-                </exclusion>
-                <exclusion>
-                    <artifactId>js</artifactId>
-                    <groupId>rhino</groupId>
-                </exclusion>
-                <exclusion>
-                    <artifactId>jchronic</artifactId>
-                    <groupId>com.sk89q</groupId>
-                </exclusion>
-                <exclusion>
-                    <artifactId>iconomy</artifactId>
-                    <groupId>com.nijikokun</groupId>
-                </exclusion>
-                <exclusion>
-                    <artifactId>commandbook</artifactId>
-                    <groupId>com.sk89q</groupId>
-                </exclusion>
-            </exclusions>
+            <scope>provided</scope>
         </dependency>
     </dependencies>
     <distributionManagement>

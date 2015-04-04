@@ -10,9 +10,12 @@ import com.sk89q.worldguard.protection.flags.Flag;
 import com.sk89q.worldguard.protection.flags.RegionGroup;
 import com.sk89q.worldguard.protection.managers.RegionManager;
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
+
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.bukkit.Location;
@@ -318,6 +321,8 @@ public final class Util
         }
         else
         {
+            List<ProtectedRegion> regionList = new ArrayList<ProtectedRegion>();
+            regionList.add(region);
             HashSet<Object> allowedValues = (HashSet<Object>) region.getFlag(allowFlag);
             HashSet<Object> blockedValues = (HashSet<Object>) region.getFlag(denyFlag);
             
@@ -340,7 +345,7 @@ public final class Util
                         allowedValues = null;
                     }
                 }
-                else if (!group.contains(player.getAssociation(region)))
+                else if (!group.contains(player.getAssociation(regionList)))
                 {
                     allowedValues = null;
                 }
@@ -366,7 +371,7 @@ public final class Util
                         blockedValues = null;
                     }
                 }
-                else if (!group.contains(player.getAssociation(region)))
+                else if (!group.contains(player.getAssociation(regionList)))
                 {
                     blockedValues = null;
                 }
