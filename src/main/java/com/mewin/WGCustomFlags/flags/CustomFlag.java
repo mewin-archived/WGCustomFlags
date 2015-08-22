@@ -24,12 +24,15 @@ import com.sk89q.worldguard.protection.flags.RegionGroup;
  * allways use this class as sub class if you want your flags to be saved
  * @author mewin <mewin001@hotmail.de>
  */
-public abstract class CustomFlag<T> extends Flag<T> {
-    public CustomFlag(String name, RegionGroup rg) {
+public abstract class CustomFlag<T> extends Flag<T>
+{
+    public CustomFlag(String name, RegionGroup rg)
+    {
         super(name, rg);
     }
 
-    public CustomFlag(String name) {
+    public CustomFlag(String name)
+    {
         super(name);
     }
 
@@ -40,7 +43,8 @@ public abstract class CustomFlag<T> extends Flag<T> {
      * @param value the object saved with the flag
      * @return a value that can be saved as YAML
      */
-    public Object getYAML(T value) {
+    public Object getYAML(T value)
+    {
         return this.marshal(value);
     }
 
@@ -50,7 +54,8 @@ public abstract class CustomFlag<T> extends Flag<T> {
      * @param obj the YAML value that has been saved
      * @return an instance of T fitting to the saved YAML value
      */
-    public T fromYAML(Object obj) {
+    public T fromYAML(Object obj)
+    {
         return this.unmarshal(obj);
     }
 

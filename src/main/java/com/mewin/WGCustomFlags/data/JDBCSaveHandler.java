@@ -35,10 +35,10 @@ import com.sk89q.worldguard.protection.flags.StateFlag;
 import com.sk89q.worldguard.protection.flags.StringFlag;
 import com.sk89q.worldguard.protection.flags.VectorFlag;
 import com.sk89q.worldguard.protection.managers.RegionManager;
+import com.sk89q.worldguard.protection.managers.storage.sql.SQLDriver;
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
 import java.sql.CallableStatement;
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.SQLWarning;
@@ -57,12 +57,15 @@ import org.bukkit.World;
  *
  * @author mewin <mewin001@hotmail.de>
  */
-public class JDBCSaveHandler implements FlagSaveHandler {
-    private Connection connection;
+public class JDBCSaveHandler implements FlagSaveHandler
+{
+    //private Connection connection;
     private WGCustomFlagsPlugin plugin;
-    private String dns, username, password;
+    //private String dns, username, password;
+    private SQLDriver driver;
 
-    public JDBCSaveHandler(String dns, String username, String password, WGCustomFlagsPlugin plugin){
+    /*public JDBCSaveHandler(String dns, String username, String password, WGCustomFlagsPlugin plugin)
+    {
         this.plugin = plugin;
         try {
             this.dns = dns;
@@ -77,9 +80,13 @@ public class JDBCSaveHandler implements FlagSaveHandler {
         } catch (SQLException ex) {
             plugin.getLogger().log(Level.SEVERE, "Could not connect to database.", ex);
         }
+    }*/
+    public JDBCSaveHandler(SQLDriver driver)
+    {
+        this.driver = driver;
     }
     
-    private void attemptReconnect()
+    /*private void attemptReconnect()
     {
         try {
             if (connection.isClosed())
@@ -95,9 +102,13 @@ public class JDBCSaveHandler implements FlagSaveHandler {
         } catch (SQLException ex) {
             reconnect();
         }
+    }*/
+    private Connection getConnection()
+    {
+        return (Connection) ClassHacker.callPrivateMethod(driver, "getConnection", new Class[0], new Object[0]);
     }
     
-    private void reconnect()
+    /*private void reconnect()
     {
         try {
             connection.close();
@@ -111,16 +122,23 @@ public class JDBCSaveHandler implements FlagSaveHandler {
         } catch (Exception ex) {
             plugin.getLogger().log(Level.SEVERE, "Could not reconnect to database.", ex);
         }
-    }
+    }*/
 
     @Override
-    public void saveFlagsForWorld(World world){
+    public void saveFlagsForWorld(World world)
+    {
+        Connection connection = getConnection();
+        if (connection == null)
+        {
+            plugin.getLogger().warning("Could not retrieve connection, no flags saved.");
+            return;
+        }
         RegionManager regionManager = WGCustomFlagsPlugin.wgPlugin.getRegionManager(world);
         if (regionManager == null) {
             plugin.getLogger().info("Regions not activated, no flags saved.");
             return;
         }
-        attemptReconnect();
+        //attemptReconnect();
         Iterator<Entry<String, ProtectedRegion>> itr = regionManager.getRegions().entrySet().iterator();
 
         Statement st;
@@ -200,8 +218,9 @@ public class JDBCSaveHandler implements FlagSaveHandler {
         }
     }
 
-    private String getFlagValue(Flag flag, Object value) {
-        attemptReconnect();
+    private String getFlagValue(Flag flag, Object value)
+    {
+        //attemptReconnect();
         String nextSql = "";
         if (flag instanceof BooleanFlag) {
             nextSql += Boolean.toString((Boolean) value);
@@ -255,23 +274,33 @@ public class JDBCSaveHandler implements FlagSaveHandler {
     }
 
     @Override
-    public void loadFlagsForWorld(World world) {
+    public void loadFlagsForWorld(World world)
+    {
+        Connection connection = getConnection();
+        if (connection == null)
+        {
+            plugin.getLogger().warning("Could not retrieve connection, no flags loaded.");
+            return;
+        }
         RegionManager regionManager = WGCustomFlagsPlugin.wgPlugin.getRegionManager(world);
 
         if (regionManager == null) {
             return;
         }
-        attemptReconnect();
-        try {
+        //attemptReconnect();
+        try
+        {
             CallableStatement st = connection.prepareCall("SELECT * FROM worldflags WHERE world = '" + world.getName() + "'");
 
             ResultSet rs = st.executeQuery();
 
-            while(rs.next()) {
+            while(rs.next())
+            {
                 Flag flag = FlagManager.customFlags.get(rs.getString("flagName"));
                 ProtectedRegion region = regionManager.getRegion(rs.getString("region"));
 
-                if (flag == null || region == null) {
+                if (flag == null || region == null)
+                {
                     //System.out.println("Error loading flags from db");
                     continue;
                 }
@@ -280,20 +309,25 @@ public class JDBCSaveHandler implements FlagSaveHandler {
 
                 setRegionFlag(region, flag, value);
             }
-        } catch (Exception ex) {
+        }
+        catch (Exception ex)
+        {
             Logger.getLogger(JDBCSaveHandler.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 
-    private void setRegionFlag(ProtectedRegion region, Flag flag, String value) {
+    private void setRegionFlag(ProtectedRegion region, Flag flag, String value)
+    {
         Object val = getFlagValue(region, flag, value);
 
-        if (val != null) {
+        if (val != null)
+        {
             region.setFlag(flag, val);
         }
     }
 
-    private Object getFlagValue(ProtectedRegion region, Flag flag, String value) {
+    private Object getFlagValue(ProtectedRegion region, Flag flag, String value)
+    {
         if (flag instanceof StringFlag || flag instanceof CommandStringFlag) {
             return value;
         } else if (flag instanceof EnumFlag) {
@@ -349,19 +383,21 @@ public class JDBCSaveHandler implements FlagSaveHandler {
         return null;
     }
 
-    private float shortenFloat(float f, int dig) {
+    private float shortenFloat(float f, int dig)
+    {
         return (float) (Math.round(f * Math.pow(10, dig)) / Math.pow(10, dig));
     }
 
-    private double shortenDouble(double d, int dig) {
+    private double shortenDouble(double d, int dig)
+    {
         return Math.round(d * Math.pow(10, dig)) / Math.pow(10, dig);
     }
 
-    public void close() {
+    /*public void close() {
         try {
             connection.close();
         } catch (SQLException ex) {
             plugin.getLogger().log(Level.SEVERE, "Could not close database connection: ", ex);
         }
-    }
+    }*/
 }

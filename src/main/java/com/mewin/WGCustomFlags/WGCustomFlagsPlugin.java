@@ -29,6 +29,8 @@ import com.sk89q.worldguard.protection.flags.EnumFlag;
 import com.sk89q.worldguard.protection.flags.Flag;
 import com.sk89q.worldguard.protection.flags.SetFlag;
 import com.sk89q.worldguard.protection.flags.StateFlag;
+import com.sk89q.worldguard.protection.flags.StateFlag.State;
+import com.sk89q.worldguard.protection.managers.storage.sql.SQLDriver;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
@@ -172,12 +174,16 @@ public class WGCustomFlagsPlugin extends JavaPlugin {
         configFile = new File(getDataFolder(), "config.yml");
 
         setupWgPlugin();
-        if (wgPlugin.getGlobalStateManager().useSqlDatabase)
+        if (wgPlugin.getGlobalStateManager().selectedRegionStoreDriver instanceof SQLDriver)
+        {
+            jdbcConnector = new JDBCSaveHandler((SQLDriver) wgPlugin.getGlobalStateManager().selectedRegionStoreDriver);
+        }
+        /*if (wgPlugin.getGlobalStateManager().useSqlDatabase)
         {
             jdbcConnector = new JDBCSaveHandler(wgPlugin.getGlobalStateManager().sqlDsn,
                     wgPlugin.getGlobalStateManager().sqlUsername,
                     wgPlugin.getGlobalStateManager().sqlPassword, this);
-        }
+        }*/
 
         getServer().getPluginManager().registerEvents(listener, this);
         getServer().getPluginManager().registerEvents(plListener, this);
@@ -203,10 +209,11 @@ public class WGCustomFlagsPlugin extends JavaPlugin {
     public void onDisable()
     {
         saveAllWorlds(false);
-        if (jdbcConnector != null)
+        
+        /*if (jdbcConnector != null)
         {
             jdbcConnector.close();
-        }
+        }*/
     }
     /**
      * loads the flag values for all worlds
@@ -309,7 +316,7 @@ public class WGCustomFlagsPlugin extends JavaPlugin {
 
     private FlagSaveHandler getSaveHandler()
     {
-        if (config.getString("save-handler", "auto").equalsIgnoreCase("auto") && wgPlugin.getGlobalStateManager().useSqlDatabase)
+        if (config.getString("save-handler", "auto").equalsIgnoreCase("auto") && wgPlugin.getGlobalStateManager().selectedRegionStoreDriver instanceof SQLDriver)
         {
             return jdbcConnector;
         }
@@ -360,7 +367,7 @@ public class WGCustomFlagsPlugin extends JavaPlugin {
                     sender.sendMessage(ChatColor.BLUE + "Type: " + flag.getClass().getSimpleName());
                     if (flag instanceof StateFlag)
                     {
-                        sender.sendMessage(ChatColor.BLUE + "Default: " + (((StateFlag) flag).getDefault() ? "ALLOW" : "DENY"));
+                        sender.sendMessage(ChatColor.BLUE + "Default: " + (((StateFlag) flag).getDefault() == State.ALLOW ? "ALLOW" : "DENY"));
                     }
                     else if (flag instanceof EnumFlag)
                     {
