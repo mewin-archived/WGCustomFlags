@@ -16,9 +16,12 @@
  */
 package com.mewin.WGCustomFlags.flags;
 
+import com.mewin.WGCustomFlags.WGCustomFlagsPlugin;
 import com.sk89q.minecraft.util.commands.CommandException;
+import com.sk89q.worldedit.Location;
 import com.sk89q.worldedit.Vector;
 import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
+import com.sk89q.worldguard.protection.flags.FlagContext;
 import com.sk89q.worldguard.protection.flags.InvalidFlagFormat;
 import com.sk89q.worldguard.protection.flags.RegionGroup;
 import org.bukkit.command.CommandSender;
@@ -37,7 +40,11 @@ public class CustomVectorFlag extends CustomFlag<Vector> {
     }
 
     @Override
-    public Vector parseInput(WorldGuardPlugin plugin, CommandSender sender, String input) throws InvalidFlagFormat {
+    public Vector parseInput(FlagContext fc) throws InvalidFlagFormat
+    {
+        WorldGuardPlugin plugin = WGCustomFlagsPlugin.wgPlugin;
+        CommandSender sender = fc.getSender();
+        String input = fc.getUserInput();
         input = input.trim();
 
         if ("here".equalsIgnoreCase(input)) {

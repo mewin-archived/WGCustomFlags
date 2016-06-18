@@ -16,12 +16,14 @@
  */
 package com.mewin.WGCustomFlags.flags;
 
+import com.mewin.WGCustomFlags.WGCustomFlagsPlugin;
 import com.sk89q.minecraft.util.commands.CommandException;
 import com.sk89q.worldedit.Location;
 import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.bukkit.BukkitUtil;
 import com.sk89q.worldedit.bukkit.BukkitWorld;
 import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
+import com.sk89q.worldguard.protection.flags.FlagContext;
 import com.sk89q.worldguard.protection.flags.InvalidFlagFormat;
 import com.sk89q.worldguard.protection.flags.RegionGroup;
 import org.bukkit.Bukkit;
@@ -43,7 +45,12 @@ public class CustomLocationFlag extends CustomFlag<Location> {
     }
 
     @Override
-    public Location parseInput(WorldGuardPlugin plugin, CommandSender sender, String input) throws InvalidFlagFormat {
+    public Location parseInput(FlagContext fc) throws InvalidFlagFormat
+    {
+        WorldGuardPlugin plugin = WGCustomFlagsPlugin.wgPlugin;
+        CommandSender sender = fc.getSender();
+        String input = fc.getUserInput();
+
         input = input.trim();
 
         final Player player;
@@ -124,8 +131,8 @@ public class CustomLocationFlag extends CustomFlag<Location> {
                 return null;
             }
 
-            return new Location(new BukkitWorld(Bukkit.getServer().getWorld(split[0])), 
-                    new Vector(Double.valueOf(split[1]), Double.valueOf(split[2]), Double.valueOf(split[3])), 
+            return new Location(new BukkitWorld(Bukkit.getServer().getWorld(split[0])),
+                    new Vector(Double.valueOf(split[1]), Double.valueOf(split[2]), Double.valueOf(split[3])),
                     Float.valueOf(split[4]), Float.valueOf(split[5]));
     }
 

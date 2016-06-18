@@ -17,7 +17,10 @@
 
 package com.mewin.WGCustomFlags.flags;
 
+import com.mewin.WGCustomFlags.WGCustomFlagsPlugin;
+import com.sk89q.worldedit.Location;
 import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
+import com.sk89q.worldguard.protection.flags.FlagContext;
 import com.sk89q.worldguard.protection.flags.InvalidFlagFormat;
 import com.sk89q.worldguard.protection.flags.RegionGroup;
 import org.bukkit.Bukkit;
@@ -35,12 +38,12 @@ public class PluginFlag extends CustomFlag<Plugin>
     {
         super(name);
     }
-    
+
     public PluginFlag(String name, RegionGroup rg)
     {
         super(name, rg);
     }
-    
+
     @Override
     public Plugin loadFromDb(String str)
     {
@@ -53,10 +56,15 @@ public class PluginFlag extends CustomFlag<Plugin>
         return (String) marshal(o);
     }
 
+
     @Override
-    public Plugin parseInput(WorldGuardPlugin wgp, CommandSender cs, String string) throws InvalidFlagFormat
+    public Plugin parseInput(FlagContext fc) throws InvalidFlagFormat
     {
-        Plugin plug = unmarshal(string);
+        WorldGuardPlugin plugin = WGCustomFlagsPlugin.wgPlugin;
+        CommandSender sender = fc.getSender();
+        String input = fc.getUserInput();
+        
+        Plugin plug = unmarshal(input);
         if (plug == null)
         {
             throw new InvalidFlagFormat("No plugin with this name found.");
