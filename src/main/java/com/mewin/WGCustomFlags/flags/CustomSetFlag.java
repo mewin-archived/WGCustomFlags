@@ -16,8 +16,10 @@
  */
 package com.mewin.WGCustomFlags.flags;
 
+import com.mewin.WGCustomFlags.WGCustomFlagsPlugin;
 import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
 import com.sk89q.worldguard.protection.flags.Flag;
+import com.sk89q.worldguard.protection.flags.FlagContext;
 import com.sk89q.worldguard.protection.flags.InvalidFlagFormat;
 import com.sk89q.worldguard.protection.flags.RegionGroup;
 import java.util.ArrayList;
@@ -49,12 +51,14 @@ public class CustomSetFlag<T> extends CustomFlag<Set<T>> {
     }
 
     @Override
-    public Set<T> parseInput(WorldGuardPlugin plugin, CommandSender sender,
-            String input) throws InvalidFlagFormat {
+    public Set<T> parseInput(FlagContext flagContext) throws InvalidFlagFormat {
+        String input = flagContext.getUserInput();
+        WorldGuardPlugin plugin = WGCustomFlagsPlugin.wgPlugin;
+        CommandSender sender = flagContext.getSender();
         Set<T> items = new HashSet<T>();
 
         for (String str : input.split(",")) {
-            items.add(subFlag.parseInput(plugin, sender, str.trim()));
+            items.add(subFlag.parseInput(flagContext));
         }
 
         return new HashSet<T>(items);
