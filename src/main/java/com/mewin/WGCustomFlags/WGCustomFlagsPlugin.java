@@ -16,9 +16,6 @@
  */
 package com.mewin.WGCustomFlags;
 
-import com.mewin.WGCustomFlags.data.FlagSaveHandler;
-import com.mewin.WGCustomFlags.data.JDBCSaveHandler;
-import com.mewin.WGCustomFlags.data.YAMLSaveHandler;
 import com.mewin.WGCustomFlags.flags.CustomSetFlag;
 import com.mewin.WGCustomFlags.util.ClassHacker;
 import com.sk89q.util.yaml.YAMLFormat;
@@ -30,7 +27,6 @@ import com.sk89q.worldguard.protection.flags.Flag;
 import com.sk89q.worldguard.protection.flags.SetFlag;
 import com.sk89q.worldguard.protection.flags.StateFlag;
 import com.sk89q.worldguard.protection.flags.StateFlag.State;
-import com.sk89q.worldguard.protection.managers.storage.sql.SQLDriver;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
@@ -79,8 +75,7 @@ public class WGCustomFlagsPlugin extends JavaPlugin {
                                                + "# description: enable/disable experimental tab completions for the region command of WorldGuard\r\n"
                                                + "# values: true,false\r\n"
                                                + "tab-completions: false";*/
-    
-    private JDBCSaveHandler jdbcConnector = null;
+
     private WGCustomFlagsListener listener;
     private PluginListener plListener;
 
@@ -173,33 +168,28 @@ public class WGCustomFlagsPlugin extends JavaPlugin {
         FlagManager.setWGCFInstance(this);
         configFile = new File(getDataFolder(), "config.yml");
 
-        setupWgPlugin();
-        if (wgPlugin.getGlobalStateManager().selectedRegionStoreDriver instanceof SQLDriver)
-        {
-            jdbcConnector = new JDBCSaveHandler((SQLDriver) wgPlugin.getGlobalStateManager().selectedRegionStoreDriver);
-        }
-        /*if (wgPlugin.getGlobalStateManager().useSqlDatabase)
-        {
-            jdbcConnector = new JDBCSaveHandler(wgPlugin.getGlobalStateManager().sqlDsn,
-                    wgPlugin.getGlobalStateManager().sqlUsername,
-                    wgPlugin.getGlobalStateManager().sqlPassword, this);
-        }*/
-
         getServer().getPluginManager().registerEvents(listener, this);
         getServer().getPluginManager().registerEvents(plListener, this);
 
         loadConfig();
-        
+
         if (config.getBoolean("tab-completions", false))
         {
             getServer().getPluginManager().registerEvents(new TabCompleteListener(wgPlugin), this);
         }
-        
+
         flagLogging = config.getBoolean("flag-logging", true);
 
         ClassHacker.setPrivateValue(wgPlugin.getDescription(), "version", wgPlugin.getDescription().getVersion() + " with custom flags plugin.");
     }
-    
+
+    @Override
+    public void onLoad()
+    {
+        setupWgPlugin();
+    }
+
+
     public boolean isFlagLogging()
     {
         return this.flagLogging;
@@ -209,7 +199,7 @@ public class WGCustomFlagsPlugin extends JavaPlugin {
     public void onDisable()
     {
         saveAllWorlds(false);
-        
+
         /*if (jdbcConnector != null)
         {
             jdbcConnector.close();
@@ -233,12 +223,10 @@ public class WGCustomFlagsPlugin extends JavaPlugin {
      * should not be called manually
      * @param world the world to load the flags for
      */
+    @Deprecated
     public void loadFlagsForWorld(World world)
     {
         //getLogger().log(Level.INFO, "Loading flags for world {0}", world.getName());
-        FlagSaveHandler handler = getSaveHandler();
-
-        handler.loadFlagsForWorld(world);
     }
 
     /**
@@ -246,14 +234,9 @@ public class WGCustomFlagsPlugin extends JavaPlugin {
      * should not be called manually
      * @param asynchron if set to true the flags will be saved asynchronously
      */
+    @Deprecated
     public void saveAllWorlds(boolean asynchron)
     {
-        Iterator<World> itr = getServer().getWorlds().iterator();
-
-        while(itr.hasNext())
-        {
-            saveFlagsForWorld(itr.next(), asynchron);
-        }
     }
 
     /**
@@ -262,29 +245,12 @@ public class WGCustomFlagsPlugin extends JavaPlugin {
      * @param world the world to save the flags for
      * @param asynchron if set to true the flags will be saved asynchronously
      */
+    @Deprecated
     public void saveFlagsForWorld(final World world, boolean asynchron)
     {
-        getLogger().log(Level.FINEST, "Saving flags for world {0}", world.getName());
-        final FlagSaveHandler handler = getSaveHandler();
-
-        if (asynchron)
-        {
-            getServer().getScheduler().runTaskAsynchronously(this, new Runnable()
-            {
-                @Override
-                public void run()
-                {
-                    handler.saveFlagsForWorld(world);
-                }
-            });
-        }
-        else
-        {
-            handler.saveFlagsForWorld(world);
-        }
     }
-    
-    
+
+
 
     /**
      * adds a custom flag and hooks it into WorldGuard
@@ -294,7 +260,7 @@ public class WGCustomFlagsPlugin extends JavaPlugin {
     {
         FlagManager.addCustomFlag(flag);
     }
-    
+
     /**
      * adds flags for all public and static fields of a class that extend Flag
      * @param clazz the class that contains the flags
@@ -304,7 +270,7 @@ public class WGCustomFlagsPlugin extends JavaPlugin {
     {
         FlagManager.addCustomFlags(clazz);
     }
-    
+
     /**
      * retrieves the custom flag configuration
      * @return a YAMLProcessor representing the configuration of the plugin
@@ -312,18 +278,6 @@ public class WGCustomFlagsPlugin extends JavaPlugin {
     public YAMLProcessor getConf()
     {
         return this.config;
-    }
-
-    private FlagSaveHandler getSaveHandler()
-    {
-        if (config.getString("save-handler", "auto").equalsIgnoreCase("auto") && wgPlugin.getGlobalStateManager().selectedRegionStoreDriver instanceof SQLDriver)
-        {
-            return jdbcConnector;
-        }
-        else
-        {
-            return new YAMLSaveHandler(this, wgPlugin);
-        }
     }
 
     @Override
@@ -363,7 +317,7 @@ public class WGCustomFlagsPlugin extends JavaPlugin {
                         }
                     }
                     sender.sendMessage(ChatColor.YELLOW + "Flag \"" + flag.getName() + "\":");
-                    sender.sendMessage(ChatColor.GRAY + (FlagManager.customFlags.containsKey(flag.getName())? "Custom" : "Default") + " flag");
+                    // sender.sendMessage(ChatColor.GRAY + (FlagManager.customFlags.containsKey(flag.getName())? "Custom" : "Default") + " flag");
                     sender.sendMessage(ChatColor.BLUE + "Type: " + flag.getClass().getSimpleName());
                     if (flag instanceof StateFlag)
                     {
@@ -422,10 +376,11 @@ public class WGCustomFlagsPlugin extends JavaPlugin {
             return false;
         }
     }
-    
+
     private void sendFlagList(CommandSender sender, boolean defaults)
     {
         ArrayList<String> flags = new ArrayList<String>();
+
         Set<String> keys = FlagManager.customFlags.keySet();
         if (!defaults)
         {
@@ -433,12 +388,12 @@ public class WGCustomFlagsPlugin extends JavaPlugin {
         }
         else
         {
-            for (Flag<?> flag : DefaultFlag.getFlags())
+            for (Flag<?> flag : WGCustomFlagsPlugin.wgPlugin.getFlagRegistry())
             {
                 flags.add(flag.getName());
             }
         }
-        
+
         String text;
         if (flags.size() > 0)
         {
