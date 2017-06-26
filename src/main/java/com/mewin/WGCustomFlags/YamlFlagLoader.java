@@ -44,19 +44,18 @@ import org.yaml.snakeyaml.Yaml;
  *
  * @author mewin<mewin001@hotmail.de>
  */
-public class PluginListener implements Listener
+public class YamlFlagLoader implements Listener
 {
     private WGCustomFlagsPlugin custPlugin;
-    
-    public PluginListener(WGCustomFlagsPlugin plug)
+
+    public YamlFlagLoader(WGCustomFlagsPlugin plug)
     {
         this.custPlugin = plug;
     }
-    
-    @EventHandler
-    public void onPluginEnable(PluginEnableEvent e)
+
+    public void findFlags(Plugin plugin)
     {
-        Plugin plugin = e.getPlugin();
+        // Plugin plugin = e.getPlugin();
         Yaml yaml = new Yaml();
         InputStream in = plugin.getClass().getResourceAsStream("/flags.yml");
         if (in != null)
@@ -120,7 +119,7 @@ public class PluginListener implements Listener
             }
         }
     }
-    
+
     private Flag getFlag(String name, Map map)
     {
         String type = map.get("type").toString();
@@ -192,7 +191,7 @@ public class PluginListener implements Listener
                 Bukkit.getLogger().log(Level.WARNING, "Could not add flag " + name + ".", ex);
             }
         }
-        
+
         return newFlag;
     }
 }
