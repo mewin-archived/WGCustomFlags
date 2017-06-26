@@ -41,6 +41,7 @@ import org.bukkit.World;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.plugin.Plugin;
+import org.bukkit.plugin.PluginLoadOrder;
 import org.bukkit.plugin.java.JavaPlugin;
 
 /**
@@ -77,7 +78,6 @@ public class WGCustomFlagsPlugin extends JavaPlugin {
                                                + "tab-completions: false";*/
 
     private WGCustomFlagsListener listener;
-    private PluginListener plListener;
 
     public static WorldGuardPlugin wgPlugin;
 
@@ -93,7 +93,6 @@ public class WGCustomFlagsPlugin extends JavaPlugin {
     {
         super();
         listener = new WGCustomFlagsListener(this);
-        plListener = new PluginListener(this);
     }
 
     /**
@@ -169,7 +168,6 @@ public class WGCustomFlagsPlugin extends JavaPlugin {
         configFile = new File(getDataFolder(), "config.yml");
 
         getServer().getPluginManager().registerEvents(listener, this);
-        getServer().getPluginManager().registerEvents(plListener, this);
 
         loadConfig();
 
@@ -180,7 +178,13 @@ public class WGCustomFlagsPlugin extends JavaPlugin {
 
         flagLogging = config.getBoolean("flag-logging", true);
 
-        ClassHacker.setPrivateValue(wgPlugin.getDescription(), "version", wgPlugin.getDescription().getVersion() + " with custom flags plugin.");
+        // ClassHacker.setPrivateValue(wgPlugin.getDescription(), "version", wgPlugin.getDescription().getVersion() + " with custom flags plugin.");
+
+        YamlFlagLoader loader = new YamlFlagLoader(this);
+        for (Plugin plugin : getServer().getPluginManager().getPlugins())
+        {
+            loader.findFlags(plugin);
+        }
     }
 
     @Override
@@ -195,16 +199,6 @@ public class WGCustomFlagsPlugin extends JavaPlugin {
         return this.flagLogging;
     }
 
-    @Override
-    public void onDisable()
-    {
-        saveAllWorlds(false);
-
-        /*if (jdbcConnector != null)
-        {
-            jdbcConnector.close();
-        }*/
-    }
     /**
      * loads the flag values for all worlds
      * should not be called manually
